@@ -1,0 +1,170 @@
+﻿<Window x:Class="SkyWatch.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:SkyWatch.ViewModels"
+        xmlns:views="clr-namespace:SkyWatch.Views"
+        mc:Ignorable="d"
+        Title="SkyWatch"
+        Height="780" Width="1200"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanResizeWithGrip">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <!-- ViewModel → View 매핑 -->
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+            <views:HomeView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SearchViewModel}">
+            <views:SearchView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:FavoritesViewModel}">
+            <views:FavoritesView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <views:SettingsView/>
+        </DataTemplate>
+    </Window.Resources>
+
+    <!-- ── 앱 외곽 ── -->
+    <Border Background="{DynamicResource BgMidBrush}"
+            CornerRadius="16"
+            BorderBrush="#12FFFFFF"
+            BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" ShadowDepth="0" Opacity="0.5" Color="#000000"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>   <!-- 타이틀바 -->
+                <RowDefinition Height="*"/>    <!-- 본문 -->
+            </Grid.RowDefinitions>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- 타이틀바 (커스텀)                        -->
+            <!-- ═══════════════════════════════════════ -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource TitleBarBgBrush}"
+                    BorderBrush="{DynamicResource SubtleBorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    CornerRadius="16,16,0,0"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid Margin="16,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 왼쪽: 앱 아이콘 + 이름 -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <!-- 앱 아이콘 -->
+                        <Border Width="24" Height="24" CornerRadius="6" Margin="0,0,10,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#4FA3FF" Offset="0"/>
+                                    <GradientStop Color="#00E5FF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <TextBlock Text="🌤" FontSize="13"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="SkyWatch"
+                                   FontSize="13" FontWeight="Medium"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- 오른쪽: 창 컨트롤 버튼 -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                VerticalAlignment="Center" Margin="0,0,4,0">
+                        <Button Content="─" Style="{x:Null}"
+                                Width="32" Height="28" FontSize="10"
+                                Background="Transparent" Foreground="{DynamicResource TextMutedBrush}"
+                                BorderThickness="0" Cursor="Hand"
+                                Click="MinimizeButton_Click"/>
+                        <Button Content="□" Style="{x:Null}"
+                                Width="32" Height="28" FontSize="12"
+                                Background="Transparent" Foreground="{DynamicResource TextMutedBrush}"
+                                BorderThickness="0" Cursor="Hand"
+                                Click="MaximizeButton_Click"/>
+                        <Button Content="✕" Style="{x:Null}"
+                                Width="32" Height="28" FontSize="12"
+                                Background="Transparent" Foreground="{DynamicResource TextMutedBrush}"
+                                BorderThickness="0" Cursor="Hand"
+                                Click="CloseButton_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- 본문: 사이드바 + 콘텐츠                   -->
+            <!-- ═══════════════════════════════════════ -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="68"/>   <!-- 사이드바 -->
+                    <ColumnDefinition Width="*"/>    <!-- 메인 콘텐츠 -->
+                </Grid.ColumnDefinitions>
+
+                <!-- ── 사이드바 ── -->
+                <Border Grid.Column="0"
+                        Background="{DynamicResource SidebarBgBrush}"
+                        BorderBrush="{DynamicResource SubtleBorderBrush}"
+                        BorderThickness="0,0,1,0">
+                    <DockPanel Margin="0,20,0,20">
+                        <!-- 하단 설정 버튼 -->
+                        <RadioButton DockPanel.Dock="Bottom"
+                                     Style="{DynamicResource NavButtonStyle}"
+                                     Content="⚙️"
+                                     GroupName="Nav"
+                                     ToolTip="설정"
+                                     Command="{Binding NavigateToCommand}"
+                                     CommandParameter="Settings"
+                                     IsChecked="{Binding SelectedNavIndex, Converter={x:Null}, Mode=OneWay}"
+                                     Margin="0,0,0,0"/>
+
+                        <!-- 상단 네비게이션 -->
+                        <StackPanel VerticalAlignment="Top"
+                                    HorizontalAlignment="Center">
+                            <RadioButton Style="{DynamicResource NavButtonStyle}"
+                                         Content="🏠"
+                                         GroupName="Nav"
+                                         ToolTip="홈"
+                                         IsChecked="True"
+                                         Command="{Binding NavigateToCommand}"
+                                         CommandParameter="Home"/>
+                            <RadioButton Style="{DynamicResource NavButtonStyle}"
+                                         Content="🔍"
+                                         GroupName="Nav"
+                                         ToolTip="검색"
+                                         Command="{Binding NavigateToCommand}"
+                                         CommandParameter="Search"/>
+                            <RadioButton Style="{DynamicResource NavButtonStyle}"
+                                         Content="⭐"
+                                         GroupName="Nav"
+                                         ToolTip="즐겨찾기"
+                                         Command="{Binding NavigateToCommand}"
+                                         CommandParameter="Favorites"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- ── 메인 콘텐츠 영역 ── -->
+                <ContentControl Grid.Column="1"
+                                Content="{Binding CurrentView}"
+                                Margin="0"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

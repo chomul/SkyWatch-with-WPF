@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyWatch — WPF Weather App UI Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #050d1a;
+    --bg-mid: #0a1628;
+    --bg-card: rgba(255,255,255,0.045);
+    --bg-card-hover: rgba(255,255,255,0.07);
+    --glass: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.1);
+    --accent-blue: #4fa3ff;
+    --accent-cyan: #00e5ff;
+    --accent-warm: #ffd166;
+    --accent-rain: #74b9ff;
+    --text-primary: #f0f6ff;
+    --text-secondary: rgba(240,246,255,0.55);
+    --text-muted: rgba(240,246,255,0.3);
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 60px rgba(79,163,255,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79,163,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(0,229,255,0.04) 0%, transparent 60%);
+  }
+
+  /* ── LAYOUT WRAPPER ── */
+  .mockup-wrapper {
+    width: 1200px;
+    max-width: 100%;
+  }
+
+  .mockup-label {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .mockup-label h1 {
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .mockup-label span {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4fa3ff 0%, #00e5ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  /* ── APP SHELL ── */
+  .app-shell {
+    background: var(--bg-mid);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.07);
+    box-shadow: var(--shadow), var(--shadow-glow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TITLE BAR ── */
+  .titlebar {
+    background: rgba(5,13,26,0.95);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+  }
+  .titlebar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .app-icon {
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #4fa3ff, #00e5ff);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+  .app-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+  }
+  .win-controls {
+    display: flex;
+    gap: 8px;
+  }
+  .win-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .win-close { background: #ff5f57; }
+  .win-min { background: #febc2e; }
+  .win-max { background: #28c840; }
+
+  /* ── MAIN BODY ── */
+  .app-body {
+    display: flex;
+    flex: 1;
+    min-height: 680px;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 68px;
+    background: rgba(5,13,26,0.8);
+    border-right: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(79,163,255,0.2), rgba(0,229,255,0.1));
+    border: 1px solid rgba(79,163,255,0.3);
+  }
+  .nav-item:not(.active) { color: var(--text-muted); }
+  .nav-spacer { flex: 1; }
+  .nav-dot {
+    width: 4px; height: 4px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .search-box {
+    flex: 1;
+    max-width: 340px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .search-box span { font-size: 16px; color: var(--text-muted); }
+  .search-box p { font-size: 13px; color: var(--text-muted); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .toggle-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer;
+  }
+  .unit-badge {
+    background: linear-gradient(135deg, rgba(79,163,255,0.25), rgba(0,229,255,0.15));
+    border: 1px solid rgba(79,163,255,0.4);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-blue);
+  }
+
+  /* ── HERO WEATHER CARD ── */
+  .hero-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -40px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(79,163,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-left {}
+  .city-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .city-name {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .country-badge {
+    background: rgba(79,163,255,0.15);
+    border: 1px solid rgba(79,163,255,0.25);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--accent-blue);
+    font-weight: 500;
+  }
+  .weather-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .temp-main {
+    font-size: 80px;
+    font-weight: 200;
+    line-height: 1;
+    letter-spacing: -4px;
+    background: linear-gradient(135deg, #f0f6ff 30%, rgba(240,246,255,0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .temp-main sup { font-size: 32px; letter-spacing: 0; font-weight: 300; }
+  .temp-range {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .temp-hi { color: #ff8a65; font-size: 14px; font-weight: 500; }
+  .temp-lo { color: var(--accent-blue); font-size: 14px; font-weight: 500; }
+  .hero-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 16px;
+  }
+  .weather-emoji { font-size: 90px; line-height: 1; filter: drop-shadow(0 4px 20px rgba(255,213,102,0.3)); }
+  .last-updated { font-size: 11px; color: var(--text-muted); }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .stat-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stat-icon { font-size: 20px; margin-bottom: 2px; }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-value { font-size: 22px; font-weight: 600; }
+  .stat-sub { font-size: 11px; color: var(--text-secondary); }
+
+  /* ── BOTTOM ROW ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+
+  /* HOURLY */
+  .section-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 22px;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .hourly-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .hourly-list::-webkit-scrollbar { height: 0; }
+  .hour-item {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    min-width: 56px;
+  }
+  .hour-item.now {
+    background: linear-gradient(160deg, rgba(79,163,255,0.18) 0%, rgba(0,229,255,0.08) 100%);
+    border-color: rgba(79,163,255,0.35);
+  }
+  .hour-time { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+  .hour-time.now-label { color: var(--accent-cyan); }
+  .hour-icon { font-size: 20px; }
+  .hour-temp { font-size: 14px; font-weight: 600; }
+  .hour-rain { font-size: 10px; color: var(--accent-rain); }
+
+  /* Chart area */
+  .chart-area {
+    height: 80px;
+    position: relative;
+    margin-top: 8px;
+  }
+  svg.chart {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .chart-path {
+    fill: none;
+    stroke: url(#lineGrad);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .chart-fill {
+    fill: url(#fillGrad);
+  }
+
+  /* WEEKLY */
+  .weekly-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .day-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .day-item.today {
+    background: rgba(79,163,255,0.07);
+    border-color: rgba(79,163,255,0.15);
+  }
+  .day-name { font-size: 13px; font-weight: 500; width: 36px; }
+  .day-icon { font-size: 18px; }
+  .day-desc { font-size: 12px; color: var(--text-muted); flex: 1; }
+  .day-rain { font-size: 11px; color: var(--accent-rain); width: 32px; text-align: right; }
+  .temp-bar-wrap { display: flex; align-items: center; gap: 6px; }
+  .temp-lo-s { font-size: 12px; color: var(--text-muted); width: 28px; text-align: right; }
+  .temp-bar { width: 60px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); position: relative; }
+  .temp-bar-inner { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #74b9ff, #ff8a65); }
+  .temp-hi-s { font-size: 12px; font-weight: 600; width: 28px; }
+
+  /* ── FAVORITES PANEL ── */
+  .fav-panel {
+    width: 240px;
+    background: rgba(5,13,26,0.6);
+    border-left: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .fav-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .fav-city {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    position: relative;
+  }
+  .fav-city.active-city {
+    background: rgba(79,163,255,0.1);
+    border-color: rgba(79,163,255,0.25);
+  }
+  .fav-city-icon { font-size: 20px; }
+  .fav-city-info { flex: 1; }
+  .fav-city-name { font-size: 12px; font-weight: 600; }
+  .fav-city-temp { font-size: 11px; color: var(--text-secondary); }
+  .fav-city-weather { font-size: 11px; color: var(--text-muted); }
+  .fav-active-dot {
+    width: 6px; height: 6px;
+    background: var(--accent-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0,229,255,0.6);
+  }
+  .fav-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px dashed rgba(255,255,255,0.12);
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    background: none;
+    margin-top: 4px;
+  }
+  .fav-spacer { flex: 1; }
+  .sun-info {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .sun-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 10px; }
+  .sun-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .sun-item { text-align: center; }
+  .sun-item-icon { font-size: 18px; }
+  .sun-item-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .sun-item-time { font-size: 13px; font-weight: 600; }
+  .sun-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.07); }
+  .daytime-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    margin-top: 8px;
+    position: relative;
+  }
+  .daytime-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #ff9500, #ffd166);
+    width: 60%;
+  }
+
+  /* ── SCREEN LABELS ── */
+  .screen-labels {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .label-chip {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .label-chip strong { color: var(--accent-blue); }
+
+  /* ── SECOND MOCKUP (Dark toggle preview) ── */
+  .dual-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 32px;
+  }
+  .sub-mockup {
+    background: var(--bg-mid);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.07);
+    overflow: hidden;
+  }
+  .sub-mockup.light-mode {
+    background: #f0f5ff;
+    border-color: rgba(0,0,0,0.1);
+  }
+  .sub-titlebar {
+    background: rgba(5,13,26,0.95);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sub-titlebar.light { background: #e4eaf5; }
+  .sub-content { padding: 20px; }
+
+  /* Light theme sub mockup */
+  .light-hero {
+    background: linear-gradient(135deg, #dde8fc 0%, #c8daf9 100%);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .light-city { font-size: 16px; font-weight: 700; color: #1a2a4a; }
+  .light-temp { font-size: 52px; font-weight: 200; color: #1a3050; letter-spacing: -2px; }
+  .light-desc { font-size: 13px; color: #4a6080; }
+  .light-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .light-stat {
+    background: white;
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .light-stat-val { font-size: 16px; font-weight: 700; color: #1a3050; }
+  .light-stat-lbl { font-size: 10px; color: #7a90aa; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Search view sub mockup */
+  .search-view-content { padding: 20px; }
+  .search-input-mock {
+    background: var(--glass);
+    border: 1px solid rgba(79,163,255,0.4);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .search-input-mock span { font-size: 16px; }
+  .search-input-mock p { font-size: 14px; font-weight: 500; }
+  .search-result {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .search-result.top-result {
+    background: rgba(79,163,255,0.1);
+    border: 1px solid rgba(79,163,255,0.2);
+  }
+  .result-flag { font-size: 20px; }
+  .result-info {}
+  .result-city { font-size: 13px; font-weight: 600; }
+  .result-country { font-size: 11px; color: var(--text-muted); }
+  .result-temp { margin-left: auto; font-size: 16px; font-weight: 600; color: var(--accent-blue); }
+
+  .note-bar {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-wrapper">
+
+  <!-- Header -->
+  <div class="mockup-label">
+    <h1>UI Mockup Design Reference</h1>
+    <span>🌤 SkyWatch — WPF Weather App</span>
+  </div>
+
+  <!-- MAIN APP SHELL -->
+  <div class="app-shell">
+    <!-- Titlebar -->
+    <div class="titlebar">
+      <div class="titlebar-left">
+        <div class="win-controls">
+          <div class="win-btn win-close"></div>
+          <div class="win-btn win-min"></div>
+          <div class="win-btn win-max"></div>
+        </div>
+        <div class="app-icon">🌤</div>
+        <div class="app-title">SkyWatch</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="app-body">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="nav-item active" title="홈">🏠<div class="nav-dot"></div></div>
+        <div class="nav-item" title="검색">🔍</div>
+        <div class="nav-item" title="즐겨찾기">⭐</div>
+        <div class="nav-spacer"></div>
+        <div class="nav-item" title="설정">⚙️</div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content">
+        <!-- Top bar -->
+        <div class="topbar">
+          <div class="search-box">
+            <span>🔍</span>
+            <p>도시 검색...</p>
+          </div>
+          <div class="topbar-right">
+            <div class="toggle-btn">🌙 다크 모드</div>
+            <div class="toggle-btn">🔄 지금 갱신</div>
+            <div class="unit-badge">°C</div>
+          </div>
+        </div>
+
+        <!-- Hero Weather Card -->
+        <div class="hero-card">
+          <div class="hero-left">
+            <div class="city-row">
+              <span class="city-name">Seoul</span>
+              <span class="country-badge">KR</span>
+            </div>
+            <div class="weather-desc">🌤 대체로 맑음 &nbsp;·&nbsp; 오늘</div>
+            <div class="temp-main">23<sup>°</sup></div>
+            <div class="temp-range">
+              <span class="temp-hi">↑ 27°</span>
+              <span class="temp-lo">↓ 16°</span>
+              <span style="font-size:13px;color:var(--text-muted)">체감 21°</span>
+            </div>
+          </div>
+          <div class="hero-right">
+            <div class="weather-emoji">🌤</div>
+            <div class="last-updated" style="color:var(--text-muted);font-size:11px">15:30 갱신</div>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">💧</div>
+            <div class="stat-label">습도</div>
+            <div class="stat-value">62<span style="font-size:14px;font-weight:400">%</span></div>
+            <div class="stat-sub">평균 이하</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💨</div>
+            <div class="stat-label">풍속</div>
+            <div class="stat-value">4.2<span style="font-size:14px;font-weight:400">m/s</span></div>
+            <div class="stat-sub">북동풍 ↗</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👁</div>
+            <div class="stat-label">가시거리</div>
+            <div class="stat-value">10<span style="font-size:14px;font-weight:400">km</span></div>
+            <div class="stat-sub">매우 좋음</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">☀️</div>
+            <div class="stat-label">UV 지수</div>
+            <div class="stat-value" style="color:#ffd166">5</div>
+            <div class="stat-sub" style="color:#ffd166">보통</div>
+          </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="bottom-row">
+          <!-- Hourly Forecast -->
+          <div class="section-card">
+            <div class="section-title">시간별 예보</div>
+            <div class="hourly-list">
+              <div class="hour-item now">
+                <div class="hour-time now-label">지금</div>
+                <div class="hour-icon">🌤</div>
+                <div class="hour-temp">23°</div>
+                <div class="hour-rain" style="color:transparent">—</div>
+              </div>
+              <div class="hour-item">
+                <div class="hour-time">18시</div>
+                <div class="hour-icon">⛅</div>
+                <div class="hour-temp">21°</div>
+                <div class="hour-rain" style="color:transparent">—</div>
+              </div>
+              <div class="hour-item">
+                <div class="hour-time">21시</div>
+                <div class="hour-icon">🌙</div>
+                <div class="hour-temp">18°</div>
+                <div class="hour-rain">10%</div>
+              </div>
+              <div class="hour-item">
+                <div class="hour-time">00시</div>
+                <div class="hour-icon">🌧</div>
+                <div class="hour-temp">16°</div>
+                <div class="hour-rain">45%</div>
+              </div>
+              <div class="hour-item">
+                <div class="hour-time">03시</div>
+                <div class="hour-icon">🌧</div>
+                <div class="hour-temp">15°</div>
+                <div class="hour-rain">60%</div>
+              </div>
+              <div class="hour-item">
+                <div class="hour-time">06시</div>
+                <div class="hour-icon">⛅</div>
+                <div class="hour-temp">16°</div>
+                <div class="hour-rain">20%</div>
+              </div>
+              <div class="hour-item">
+                <div class="hour-time">09시</div>
+                <div class="hour-icon">🌤</div>
+                <div class="hour-temp">19°</div>
+                <div class="hour-rain">5%</div>
+              </div>
+            </div>
+            <!-- Mini chart -->
+            <div class="chart-area" style="margin-top:16px">
+              <svg class="chart" viewBox="0 0 400 80" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#4fa3ff"/>
+                    <stop offset="100%" style="stop-color:#00e5ff"/>
+                  </linearGradient>
+                  <linearGradient id="fillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4fa3ff;stop-opacity:0.2"/>
+                    <stop offset="100%" style="stop-color:#4fa3ff;stop-opacity:0"/>
+                  </linearGradient>
+                </defs>
+                <path class="chart-fill" d="M0,20 C57,20 57,45 114,50 C171,55 171,60 228,65 C285,70 285,70 342,60 C370,55 385,35 400,25 L400,80 L0,80 Z"/>
+                <path class="chart-path" d="M0,20 C57,20 57,45 114,50 C171,55 171,60 228,65 C285,70 285,70 342,60 C370,55 385,35 400,25"/>
+                <circle cx="0" cy="20" r="3" fill="#4fa3ff"/>
+                <circle cx="114" cy="50" r="3" fill="#4fa3ff"/>
+                <circle cx="228" cy="65" r="3" fill="#4fa3ff"/>
+                <circle cx="342" cy="60" r="3" fill="#00e5ff"/>
+                <circle cx="400" cy="25" r="3" fill="#00e5ff"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Weekly Forecast -->
+          <div class="section-card">
+            <div class="section-title">주간 예보</div>
+            <div class="weekly-list">
+              <div class="day-item today">
+                <div class="day-name" style="color:var(--accent-cyan)">오늘</div>
+                <div class="day-icon">🌤</div>
+                <div class="day-desc">대체로 맑음</div>
+                <div class="day-rain">10%</div>
+                <div class="temp-bar-wrap">
+                  <div class="temp-lo-s" style="color:#74b9ff">16°</div>
+                  <div class="temp-bar"><div class="temp-bar-inner" style="width:70%"></div></div>
+                  <div class="temp-hi-s">27°</div>
+                </div>
+              </div>
+              <div class="day-item">
+                <div class="day-name">내일</div>
+                <div class="day-icon">🌧</div>
+                <div class="day-desc">비</div>
+                <div class="day-rain" style="color:#74b9ff">70%</div>
+                <div class="temp-bar-wrap">
+                  <div class="temp-lo-s">14°</div>
+                  <div class="temp-bar"><div class="temp-bar-inner" style="width:45%"></div></div>
+                  <div class="temp-hi-s">22°</div>
+                </div>
+              </div>
+              <div class="day-item">
+                <div class="day-name">수</div>
+                <div class="day-icon">⛅</div>
+                <div class="day-desc">구름 많음</div>
+                <div class="day-rain">25%</div>
+                <div class="temp-bar-wrap">
+                  <div class="temp-lo-s">15°</div>
+                  <div class="temp-bar"><div class="temp-bar-inner" style="width:55%"></div></div>
+                  <div class="temp-hi-s">24°</div>
+                </div>
+              </div>
+              <div class="day-item">
+                <div class="day-name">목</div>
+                <div class="day-icon">☀️</div>
+                <div class="day-desc">맑음</div>
+                <div class="day-rain">0%</div>
+                <div class="temp-bar-wrap">
+                  <div class="temp-lo-s">17°</div>
+                  <div class="temp-bar"><div class="temp-bar-inner" style="width:80%"></div></div>
+                  <div class="temp-hi-s">29°</div>
+                </div>
+              </div>
+              <div class="day-item">
+                <div class="day-name">금</div>
+                <div class="day-icon">☀️</div>
+                <div class="day-desc">맑음</div>
+                <div class="day-rain">0%</div>
+                <div class="temp-bar-wrap">
+                  <div class="temp-lo-s">18°</div>
+                  <div class="temp-bar"><div class="temp-bar-inner" style="width:85%"></div></div>
+                  <div class="temp-hi-s">30°</div>
+                </div>
+              </div>
+              <div class="day-item">
+                <div class="day-name">토</div>
+                <div class="day-icon">⛅</div>
+                <div class="day-desc">구름 조금</div>
+                <div class="day-rain">15%</div>
+                <div class="temp-bar-wrap">
+                  <div class="temp-lo-s">16°</div>
+                  <div class="temp-bar"><div class="temp-bar-inner" style="width:65%"></div></div>
+                  <div class="temp-hi-s">26°</div>
+                </div>
+              </div>
+              <div class="day-item">
+                <div class="day-name">일</div>
+                <div class="day-icon">🌤</div>
+                <div class="day-desc">대체로 맑음</div>
+                <div class="day-rain">5%</div>
+                <div class="temp-bar-wrap">
+                  <div class="temp-lo-s">15°</div>
+                  <div class="temp-bar"><div class="temp-bar-inner" style="width:72%"></div></div>
+                  <div class="temp-hi-s">27°</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Favorites Panel -->
+      <div class="fav-panel">
+        <div class="fav-header">즐겨찾기</div>
+
+        <div class="fav-city active-city">
+          <div class="fav-city-icon">🇰🇷</div>
+          <div class="fav-city-info">
+            <div class="fav-city-name">Seoul</div>
+            <div class="fav-city-temp">23° &nbsp;<span style="color:var(--text-muted)">|</span>&nbsp; 🌤</div>
+          </div>
+          <div class="fav-active-dot"></div>
+        </div>
+
+        <div class="fav-city">
+          <div class="fav-city-icon">🇺🇸</div>
+          <div class="fav-city-info">
+            <div class="fav-city-name">New York</div>
+            <div class="fav-city-temp">18° &nbsp;<span style="color:var(--text-muted)">|</span>&nbsp; ⛅</div>
+          </div>
+        </div>
+
+        <div class="fav-city">
+          <div class="fav-city-icon">🇯🇵</div>
+          <div class="fav-city-info">
+            <div class="fav-city-name">Tokyo</div>
+            <div class="fav-city-temp">26° &nbsp;<span style="color:var(--text-muted)">|</span>&nbsp; ☀️</div>
+          </div>
+        </div>
+
+        <div class="fav-city">
+          <div class="fav-city-icon">🇬🇧</div>
+          <div class="fav-city-info">
+            <div class="fav-city-name">London</div>
+            <div class="fav-city-temp">14° &nbsp;<span style="color:var(--text-muted)">|</span>&nbsp; 🌧</div>
+          </div>
+        </div>
+
+        <button class="fav-add-btn">➕ 도시 추가</button>
+
+        <div class="fav-spacer"></div>
+
+        <!-- Sunrise/Sunset -->
+        <div class="sun-info">
+          <div class="sun-title">☀️ 일출 · 일몰</div>
+          <div class="sun-row">
+            <div class="sun-item">
+              <div class="sun-item-icon">🌅</div>
+              <div class="sun-item-time">06:12</div>
+              <div class="sun-item-label">일출</div>
+            </div>
+            <div class="sun-divider"></div>
+            <div class="sun-item">
+              <div class="sun-item-icon">🌇</div>
+              <div class="sun-item-time">19:38</div>
+              <div class="sun-item-label">일몰</div>
+            </div>
+          </div>
+          <div class="daytime-bar">
+            <div class="daytime-fill"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <span style="font-size:10px;color:var(--text-muted)">낮 13시간 26분</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature chips -->
+  <div class="screen-labels">
+    <div class="label-chip">🏠 <strong>HomeView</strong> — 메인 날씨</div>
+    <div class="label-chip">📊 <strong>LiveCharts2</strong> — 기온 그래프</div>
+    <div class="label-chip">⭐ <strong>SQLite</strong> — 즐겨찾기</div>
+    <div class="label-chip">📅 <strong>7일</strong> 주간 예보</div>
+    <div class="label-chip">⏱ <strong>24시간</strong> 시간별 예보</div>
+    <div class="label-chip">🌙 다크/라이트 테마</div>
+  </div>
+
+  <!-- Dual sub mockups -->
+  <div class="dual-row">
+    <!-- Light Mode -->
+    <div>
+      <div style="text-align:center;margin-bottom:12px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">☀️ 라이트 모드</div>
+      <div class="sub-mockup light-mode">
+        <div class="sub-titlebar light">
+          <div class="win-controls" style="display:flex;gap:6px">
+            <div class="win-btn win-close"></div>
+            <div class="win-btn win-min"></div>
+            <div class="win-btn win-max"></div>
+          </div>
+          <span style="font-size:12px;color:#4a6080;margin-left:8px">SkyWatch — Light Mode</span>
+        </div>
+        <div class="sub-content">
+          <div class="light-hero">
+            <div class="light-city">🌤 Seoul, KR</div>
+            <div class="light-temp">23°</div>
+            <div class="light-desc">대체로 맑음 &nbsp;·&nbsp; 최고 27° / 최저 16°</div>
+          </div>
+          <div class="light-stats">
+            <div class="light-stat">
+              <div style="font-size:18px">💧</div>
+              <div class="light-stat-val">62%</div>
+              <div class="light-stat-lbl">습도</div>
+            </div>
+            <div class="light-stat">
+              <div style="font-size:18px">💨</div>
+              <div class="light-stat-val">4.2</div>
+              <div class="light-stat-lbl">풍속(m/s)</div>
+            </div>
+            <div class="light-stat">
+              <div style="font-size:18px">☀️</div>
+              <div class="light-stat-val" style="color:#f39c12">5</div>
+              <div class="light-stat-lbl">UV 지수</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search View -->
+    <div>
+      <div style="text-align:center;margin-bottom:12px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">🔍 검색 화면 (SearchView)</div>
+      <div class="sub-mockup">
+        <div class="sub-titlebar">
+          <div class="win-controls" style="display:flex;gap:6px">
+            <div class="win-btn win-close"></div>
+            <div class="win-btn win-min"></div>
+            <div class="win-btn win-max"></div>
+          </div>
+          <span style="font-size:12px;color:var(--text-muted);margin-left:8px">도시 검색</span>
+        </div>
+        <div class="search-view-content">
+          <div class="search-input-mock">
+            <span>🔍</span>
+            <p>부산...</p>
+            <span style="margin-left:auto;font-size:13px;color:var(--text-muted)">✕</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;letter-spacing:0.05em">검색 결과</div>
+          <div class="search-result top-result">
+            <div class="result-flag">🇰🇷</div>
+            <div class="result-info">
+              <div class="result-city">Busan</div>
+              <div class="result-country">대한민국 · 부산광역시</div>
+            </div>
+            <div class="result-temp">26°</div>
+          </div>
+          <div class="search-result">
+            <div class="result-flag">🇰🇷</div>
+            <div class="result-info">
+              <div class="result-city">Busan-si</div>
+              <div class="result-country">대한민국 · 부산</div>
+            </div>
+            <div class="result-temp" style="color:var(--text-secondary)">26°</div>
+          </div>
+          <div style="margin-top:14px;font-size:11px;color:var(--text-muted);letter-spacing:0.05em">📌 최근 검색</div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text-secondary)">Seoul</span>
+            <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text-secondary)">Tokyo</span>
+            <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text-secondary)">New York</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-bar">
+    SkyWatch WPF Weather App &nbsp;·&nbsp; UI Mockup v1.0 &nbsp;·&nbsp; Dark Mode Default
+  </div>
+
+</div>
+</body>
+</html>

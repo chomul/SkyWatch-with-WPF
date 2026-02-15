@@ -1,0 +1,38 @@
+# .NET / Visual Studio
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+
+# NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+
+# Windows
+Thumbs.db
+eht*.dll
+*.lnk
+Desktop.ini
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Misc
+*.log
+*.tmp
+_spec.txt
