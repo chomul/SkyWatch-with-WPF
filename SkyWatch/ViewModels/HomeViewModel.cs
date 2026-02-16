@@ -38,7 +38,15 @@ public partial class HomeViewModel : ViewModelBase
     [ObservableProperty]
     private bool _hasError;
 
-    public HomeViewModel() : this(new MockWeatherService())
+    // ── 온도 단위 ──
+
+    [ObservableProperty]
+    private string _unitLabel = ApiConfig.UnitLabel;
+
+    [ObservableProperty]
+    private string _windUnitLabel = ApiConfig.WindUnitLabel;
+
+    public HomeViewModel() : this(new OpenWeatherService())
     {
     }
 
@@ -91,6 +99,20 @@ public partial class HomeViewModel : ViewModelBase
     [RelayCommand]
     private async Task RefreshWeatherAsync()
     {
+        var city = CurrentWeather?.CityName ?? "Seoul";
+        await LoadWeatherAsync(city);
+    }
+
+    /// <summary>
+    /// °C ↔ °F 단위 전환 후 날씨 갱신
+    /// </summary>
+    [RelayCommand]
+    private async Task ToggleUnitAsync()
+    {
+        ApiConfig.Units = ApiConfig.Units == "metric" ? "imperial" : "metric";
+        UnitLabel = ApiConfig.UnitLabel;
+        WindUnitLabel = ApiConfig.WindUnitLabel;
+
         var city = CurrentWeather?.CityName ?? "Seoul";
         await LoadWeatherAsync(city);
     }

@@ -11,7 +11,7 @@ namespace SkyWatch.ViewModels;
 /// </summary>
 public partial class SearchViewModel : ViewModelBase
 {
-    private readonly MockSearchService _searchService = new();
+    private readonly GeocodingService _searchService = new();
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -32,10 +32,11 @@ public partial class SearchViewModel : ViewModelBase
         RecentSearches.Add("New York");
     }
 
-    // SearchQuery 변경 시 자동 검색
-    partial void OnSearchQueryChanged(string value)
+    // 엔터 키 입력 시 검색 실행
+    [RelayCommand]
+    private async Task SearchAsync()
     {
-        _ = SearchCitiesAsync(value);
+        await SearchCitiesAsync(SearchQuery);
     }
 
     private async Task SearchCitiesAsync(string query)
@@ -54,11 +55,34 @@ public partial class SearchViewModel : ViewModelBase
             SearchResults.Clear();
             foreach (var r in results)
                 SearchResults.Add(r);
+
+            // 검색 결과가 있으면 최근 검색에 추가
+            if (results.Count > 0)
+                AddToRecentSearches(query.Trim());
         }
         finally
         {
             IsSearching = false;
         }
+    }
+
+    /// <summary>
+    /// 최근 검색 목록에 추가 (중복 제거, 최대 8개)
+    /// </summary>
+    private void AddToRecentSearches(string query)
+    {
+        // 이미 있으면 제거 (맨 앞으로 이동시키기 위해)
+        var existing = RecentSearches.FirstOrDefault(
+            s => s.Equals(query, StringComparison.OrdinalIgnoreCase));
+        if (existing != null)
+            RecentSearches.Remove(existing);
+
+        // 맨 앞에 추가
+        RecentSearches.Insert(0, query);
+
+        // 최대 8개 유지
+        while (RecentSearches.Count > 8)
+            RecentSearches.RemoveAt(RecentSearches.Count - 1);
     }
 
     [RelayCommand]

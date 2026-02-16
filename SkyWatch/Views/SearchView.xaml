@@ -39,7 +39,11 @@
                          Foreground="{DynamicResource TextPrimaryBrush}"
                          FontSize="14" FontWeight="Medium"
                          VerticalAlignment="Center"
-                         CaretBrush="{DynamicResource AccentBlueBrush}"/>
+                         CaretBrush="{DynamicResource AccentBlueBrush}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Return" Command="{Binding SearchCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
                 <!-- Placeholder 텍스트 (쿼리 비어있을 때) -->
                 <TextBlock Grid.Column="1"
                            Text="도시를 검색하세요..."
