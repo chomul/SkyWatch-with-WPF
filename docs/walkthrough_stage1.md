@@ -44,3 +44,42 @@ SkyWatch/
 cd SkyWatch
 dotnet run
 ```
+
+
+## 코드 실행 구조
+
+### 앱 시작 흐름
+
+```
+App.xaml
+ └─ StartupUri="MainWindow.xaml" → MainWindow 생성
+      ├─ DataContext = MainViewModel (XAML에서 직접 생성)
+      └─ MainWindow.xaml 레이아웃:
+           ├─ 커스텀 타이틀바 (드래그/최소화/최대화/닫기)
+           ├─ 사이드바 (RadioButton × 4)
+           └─ ContentControl ← Content="{Binding CurrentView}"
+```
+
+### 네비게이션 동작 원리
+
+**Single-Window + ViewModel 스위칭** 구조로, 창을 여러 개 만들지 않고 하나의 `MainWindow` 안에서 `ContentControl`의 내용만 교체합니다.
+
+```
+[사이드바 버튼 클릭]
+ → NavigateToCommand("Home" | "Search" | "Favorites" | "Settings")
+ → MainViewModel.NavigateTo() 실행
+ → CurrentView = HomeVM / SearchVM / FavoritesVM / SettingsVM
+ → PropertyChanged 발생 (ObservableProperty)
+ → ContentControl 바인딩 업데이트
+ → DataTemplate이 ViewModel 타입에 맞는 View를 자동 렌더링
+```
+
+### 핵심 구성 요소
+
+| 구성 요소 | 파일 | 역할 |
+|-----------|------|------|
+| **ViewModel 소유** | `MainViewModel.cs` | 4개 자식 ViewModel을 생성·보유 (`HomeVM`, `SearchVM`, `FavoritesVM`, `SettingsVM`) |
+| **View 전환 커맨드** | `MainViewModel.cs` | `NavigateTo(string)` — `CurrentView` 프로퍼티를 교체 |
+| **View 표시 영역** | `MainWindow.xaml` | `ContentControl`이 `CurrentView`에 바인딩 |
+| **ViewModel→View 매핑** | `MainWindow.xaml` Resources | `DataTemplate`으로 `HomeViewModel` → `HomeView` 등 자동 매핑 |
+| **사이드바 버튼** | `MainWindow.xaml` | `RadioButton`의 `Command`/`CommandParameter`로 네비게이션 트리거 |
