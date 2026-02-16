@@ -18,51 +18,35 @@
         <StackPanel Margin="28">
 
             <!-- ══════════════════════════════════════ -->
-            <!-- Top Bar: 검색 + 갱신 + 단위 뱃지       -->
+            <!-- Top Bar: 갱신 + 단위 뱃지              -->
             <!-- ══════════════════════════════════════ -->
-            <DockPanel Margin="0,0,0,22">
-                <!-- 오른쪽: 갱신 버튼 + 단위 뱃지 -->
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
-                            VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <Button Content="🔄 갱신"
-                            Command="{Binding RefreshWeatherCommand}"
-                            Background="#0FFFFFFF" Foreground="{DynamicResource TextSecondaryBrush}"
-                            BorderBrush="#1AFFFFFF" BorderThickness="1"
-                            Padding="14,8" FontSize="12" FontFamily="Segoe UI"
-                            Cursor="Hand">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        CornerRadius="10" Padding="{TemplateBinding Padding}"
-                                        Cursor="Hand">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                    <Border Background="#404FA3FF" BorderBrush="#664FA3FF" BorderThickness="1"
-                            CornerRadius="8" Padding="12,6" Margin="12,0,0,0"
-                            VerticalAlignment="Center">
-                        <TextBlock Text="°C" FontSize="13" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AccentBlueBrush}"/>
-                    </Border>
-                </StackPanel>
-
-                <!-- 왼쪽: 검색 박스 (Placeholder) -->
-                <Border Background="#0FFFFFFF" BorderBrush="#1AFFFFFF" BorderThickness="1"
-                        CornerRadius="12" Padding="16,10" MaxWidth="340"
-                        HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🔍" FontSize="16" Foreground="{DynamicResource TextMutedBrush}"
-                                   Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="도시 검색..." FontSize="13"
-                                   Foreground="{DynamicResource TextMutedBrush}"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,22"
+                        HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="🔄 갱신"
+                        Command="{Binding RefreshWeatherCommand}"
+                        Background="#0FFFFFFF" Foreground="{DynamicResource TextSecondaryBrush}"
+                        BorderBrush="#1AFFFFFF" BorderThickness="1"
+                        Padding="14,8" FontSize="12" FontFamily="Segoe UI"
+                        Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10" Padding="{TemplateBinding Padding}"
+                                    Cursor="Hand">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Border Background="#404FA3FF" BorderBrush="#664FA3FF" BorderThickness="1"
+                        CornerRadius="8" Padding="12,6" Margin="12,0,0,0"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="°C" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentBlueBrush}"/>
                 </Border>
-            </DockPanel>
+            </StackPanel>
 
             <!-- ══════════════════════════════════════ -->
             <!-- Hero Weather Card                      -->
@@ -278,70 +262,67 @@
                                     VerticalAlignment="Center"/>
                         </DockPanel>
 
-                        <!-- 시간별 리스트 (가로 스크롤) -->
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                      VerticalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding HourlyForecasts}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border x:Name="hourBorder"
-                                                Background="#08FFFFFF"
-                                                BorderBrush="#0FFFFFFF" BorderThickness="1"
-                                                CornerRadius="14" Padding="10,12"
-                                                MinWidth="56" Margin="0,0,10,0">
-                                            <StackPanel HorizontalAlignment="Center">
-                                                <!-- 시간 -->
-                                                <TextBlock x:Name="timeText"
-                                                           Text="{Binding Time, StringFormat='{}{0:HH}시'}"
-                                                           FontSize="11" FontWeight="Medium"
-                                                           Foreground="{DynamicResource TextMutedBrush}"
-                                                           HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                                                <!-- 아이콘 -->
-                                                <TextBlock Text="{Binding IconCode, Converter={StaticResource WeatherIconConverter}}"
-                                                           FontSize="20" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                                                <!-- 온도 -->
-                                                <TextBlock Text="{Binding Temperature, StringFormat='{}{0:0}°'}"
-                                                           FontSize="14" FontWeight="SemiBold"
-                                                           Foreground="{DynamicResource TextPrimaryBrush}"
-                                                           HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                                                <!-- 강수확률 -->
-                                                <TextBlock x:Name="rainText"
-                                                           Text="{Binding RainChance, StringFormat='{}{0}%'}"
-                                                           FontSize="10"
-                                                           Foreground="{DynamicResource AccentRainBrush}"
-                                                           HorizontalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <DataTemplate.Triggers>
-                                            <!-- IsNow=true일 때 하이라이트 -->
-                                            <DataTrigger Binding="{Binding IsNow}" Value="True">
-                                                <Setter TargetName="hourBorder" Property="Background">
-                                                    <Setter.Value>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0.5,1">
-                                                            <GradientStop Color="#2E4FA3FF" Offset="0"/>
-                                                            <GradientStop Color="#1400E5FF" Offset="1"/>
-                                                        </LinearGradientBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Setter TargetName="hourBorder" Property="BorderBrush" Value="#594FA3FF"/>
-                                                <Setter TargetName="timeText" Property="Text" Value="지금"/>
-                                                <Setter TargetName="timeText" Property="Foreground"
-                                                        Value="{StaticResource AccentCyanBrush}"/>
-                                            </DataTrigger>
-                                            <!-- 강수확률 0%면 숨김 -->
-                                            <DataTrigger Binding="{Binding RainChance}" Value="0">
-                                                <Setter TargetName="rainText" Property="Visibility" Value="Hidden"/>
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                        <!-- 시간별 리스트 (균등 배치, 스크롤 없음) -->
+                        <ItemsControl ItemsSource="{Binding HourlyForecasts}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="hourBorder"
+                                            Background="#08FFFFFF"
+                                            BorderBrush="#0FFFFFFF" BorderThickness="1"
+                                            CornerRadius="14" Padding="10,12"
+                                            Margin="0,0,10,0">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <!-- 시간 -->
+                                            <TextBlock x:Name="timeText"
+                                                       Text="{Binding Time, StringFormat='{}{0:HH}시'}"
+                                                       FontSize="11" FontWeight="Medium"
+                                                       Foreground="{DynamicResource TextMutedBrush}"
+                                                       HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                            <!-- 아이콘 -->
+                                            <TextBlock Text="{Binding IconCode, Converter={StaticResource WeatherIconConverter}}"
+                                                       FontSize="20" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                            <!-- 온도 -->
+                                            <TextBlock Text="{Binding Temperature, StringFormat='{}{0:0}°'}"
+                                                       FontSize="14" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                       HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                            <!-- 강수확률 -->
+                                            <TextBlock x:Name="rainText"
+                                                       Text="{Binding RainChance, StringFormat='{}{0}%'}"
+                                                       FontSize="10"
+                                                       Foreground="{DynamicResource AccentRainBrush}"
+                                                       HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <!-- IsNow=true일 때 하이라이트 -->
+                                        <DataTrigger Binding="{Binding IsNow}" Value="True">
+                                            <Setter TargetName="hourBorder" Property="Background">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0.5,1">
+                                                        <GradientStop Color="#2E4FA3FF" Offset="0"/>
+                                                        <GradientStop Color="#1400E5FF" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter TargetName="hourBorder" Property="BorderBrush" Value="#594FA3FF"/>
+                                            <Setter TargetName="timeText" Property="Text" Value="지금"/>
+                                            <Setter TargetName="timeText" Property="Foreground"
+                                                    Value="{StaticResource AccentCyanBrush}"/>
+                                        </DataTrigger>
+                                        <!-- 강수확률 0%면 숨김 -->
+                                        <DataTrigger Binding="{Binding RainChance}" Value="0">
+                                            <Setter TargetName="rainText" Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </Border>
 

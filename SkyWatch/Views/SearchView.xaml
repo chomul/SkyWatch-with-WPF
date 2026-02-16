@@ -6,17 +6,199 @@
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
 
-    <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12"/>
-            <TextBlock Text="도시 검색"
-                       FontSize="20" FontWeight="SemiBold"
-                       Foreground="{DynamicResource TextPrimaryBrush}"
-                       HorizontalAlignment="Center"/>
-            <TextBlock Text="Stage 3에서 검색 기능이 여기에 구현됩니다"
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- 검색 입력 -->
+            <RowDefinition Height="Auto"/>  <!-- 검색 결과 헤더 -->
+            <RowDefinition Height="*"/>     <!-- 검색 결과 리스트 -->
+            <RowDefinition Height="Auto"/>  <!-- 최근 검색 -->
+        </Grid.RowDefinitions>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- 검색 입력 박스                           -->
+        <!-- ══════════════════════════════════════ -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource GlassBrush}"
+                BorderBrush="#664FA3FF" BorderThickness="1"
+                CornerRadius="12" Padding="12,10"
+                Margin="0,0,0,18">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <!-- 🔍 아이콘 -->
+                <TextBlock Grid.Column="0" Text="🔍" FontSize="16"
+                           Foreground="{DynamicResource TextMutedBrush}"
+                           VerticalAlignment="Center" Margin="4,0,10,0"/>
+                <!-- 텍스트 입력 -->
+                <TextBox Grid.Column="1"
+                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         Background="Transparent" BorderThickness="0"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         FontSize="14" FontWeight="Medium"
+                         VerticalAlignment="Center"
+                         CaretBrush="{DynamicResource AccentBlueBrush}"/>
+                <!-- Placeholder 텍스트 (쿼리 비어있을 때) -->
+                <TextBlock Grid.Column="1"
+                           Text="도시를 검색하세요..."
+                           FontSize="14"
+                           Foreground="{DynamicResource TextMutedBrush}"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SearchQuery.Length}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <!-- ✕ 클리어 버튼 -->
+                <Button Grid.Column="2"
+                        Content="✕"
+                        Command="{Binding ClearQueryCommand}"
+                        Style="{x:Null}"
+                        Background="Transparent" BorderThickness="0"
+                        FontSize="13"
+                        Foreground="{DynamicResource TextMutedBrush}"
+                        Cursor="Hand" Padding="4,0"
+                        VerticalAlignment="Center">
+                    <Button.Visibility>
+                        <Binding Path="SearchQuery.Length">
+                            <Binding.Converter>
+                                <BooleanToVisibilityConverter/>
+                            </Binding.Converter>
+                        </Binding>
+                    </Button.Visibility>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- 검색 결과 헤더                           -->
+        <!-- ══════════════════════════════════════ -->
+        <TextBlock Grid.Row="1"
+                   Text="검색 결과" FontSize="11"
+                   Foreground="{DynamicResource TextMutedBrush}"
+                   Margin="0,0,0,10">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SearchQuery.Length, FallbackValue=0, Converter={x:Null}}" Value="0">
+                            <!-- keep collapsed when empty -->
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- 검색 결과 리스트                         -->
+        <!-- ══════════════════════════════════════ -->
+        <ItemsControl Grid.Row="2"
+                      ItemsSource="{Binding SearchResults}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border x:Name="resultBorder"
+                            Background="#08FFFFFF"
+                            CornerRadius="10" Padding="12,10"
+                            Margin="0,0,0,8" Cursor="Hand">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="36"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- 국기 -->
+                            <TextBlock Grid.Column="0" Text="{Binding FlagEmoji}"
+                                       FontSize="20" VerticalAlignment="Center"/>
+                            <!-- 도시 정보 -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
+                                <TextBlock Text="{Binding CityName}" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding CountryName}" FontSize="11"
+                                           Foreground="{DynamicResource TextMutedBrush}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <!-- 온도 -->
+                            <TextBlock x:Name="tempText" Grid.Column="2"
+                                       Text="{Binding Temperature, StringFormat='{}{0:0}°'}"
+                                       FontSize="16" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AccentBlueBrush}"
+                                       VerticalAlignment="Center" Margin="8,0,4,0"/>
+                        </Grid>
+                    </Border>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding IsTopResult}" Value="True">
+                            <Setter TargetName="resultBorder" Property="Background" Value="#1A4FA3FF"/>
+                            <Setter TargetName="resultBorder" Property="BorderBrush" Value="#334FA3FF"/>
+                            <Setter TargetName="resultBorder" Property="BorderThickness" Value="1"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsTopResult}" Value="False">
+                            <Setter TargetName="tempText" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- 최근 검색                               -->
+        <!-- ══════════════════════════════════════ -->
+        <StackPanel Grid.Row="3" Margin="0,16,0,0">
+            <TextBlock Text="📌 최근 검색" FontSize="11"
+                       Foreground="{DynamicResource TextMutedBrush}"
+                       Margin="0,0,0,8"/>
+            <ItemsControl ItemsSource="{Binding RecentSearches}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#0DFFFFFF"
+                                BorderBrush="#14FFFFFF" BorderThickness="1"
+                                CornerRadius="20" Padding="12,4"
+                                Margin="0,0,8,6" Cursor="Hand">
+                            <Border.InputBindings>
+                                <MouseBinding Gesture="LeftClick"
+                                              Command="{Binding DataContext.SelectRecentSearchCommand,
+                                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                              CommandParameter="{Binding}"/>
+                            </Border.InputBindings>
+                            <TextBlock Text="{Binding}" FontSize="12"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <!-- 검색어 없을 때 빈 상태 안내 -->
+        <StackPanel Grid.Row="2"
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SearchResults.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+            <TextBlock Text="🔍" FontSize="40" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+            <TextBlock Text="도시 이름을 입력하면 검색 결과가 표시됩니다"
                        FontSize="13"
                        Foreground="{DynamicResource TextMutedBrush}"
-                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                       HorizontalAlignment="Center"/>
         </StackPanel>
     </Grid>
 </UserControl>

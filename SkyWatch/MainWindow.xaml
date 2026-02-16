@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:SkyWatch.ViewModels"
         xmlns:views="clr-namespace:SkyWatch.Views"
+        xmlns:converters="clr-namespace:SkyWatch.Converters"
         mc:Ignorable="d"
         Title="SkyWatch"
-        Height="780" Width="1200"
+        Height="900" Width="1400"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
@@ -21,6 +22,7 @@
 
     <!-- ViewModel → View 매핑 -->
     <Window.Resources>
+        <converters:WeatherIconConverter x:Key="WeatherIconConverter"/>
         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
             <views:HomeView/>
         </DataTemplate>
@@ -115,6 +117,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="68"/>   <!-- 사이드바 -->
                     <ColumnDefinition Width="*"/>    <!-- 메인 콘텐츠 -->
+                    <ColumnDefinition Width="240"/>  <!-- 즐겨찾기 패널 -->
                 </Grid.ColumnDefinitions>
 
                 <!-- ── 사이드바 ── -->
@@ -164,6 +167,151 @@
                 <ContentControl Grid.Column="1"
                                 Content="{Binding CurrentView}"
                                 Margin="0"/>
+
+                <!-- ══════════════════════════════════════ -->
+                <!-- 즐겨찾기 패널 (오른쪽 사이드)            -->
+                <!-- ══════════════════════════════════════ -->
+                <Border Grid.Column="2"
+                        Background="#99050D1A"
+                        BorderBrush="{DynamicResource SubtleBorderBrush}"
+                        BorderThickness="1,0,0,0">
+                    <DockPanel Margin="16,24,16,16">
+                        <!-- ── 하단: 일출/일몰 카드 ── -->
+                        <Border DockPanel.Dock="Bottom"
+                                Background="#08FFFFFF"
+                                BorderBrush="#0FFFFFFF" BorderThickness="1"
+                                CornerRadius="14" Padding="14" Margin="0,12,0,0">
+                            <StackPanel>
+                                <TextBlock Text="☀️ 일출 · 일몰" FontSize="10" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextMutedBrush}"
+                                           Margin="0,0,0,10"/>
+                                <!-- 일출/일몰 시간 -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- 일출 -->
+                                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                        <TextBlock Text="🌅" FontSize="18" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SunriseTime}" FontSize="13" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Text="일출" FontSize="10"
+                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <!-- 구분선 -->
+                                    <Border Grid.Column="1" Width="1" Height="36"
+                                            Background="#12FFFFFF" Margin="8,0"/>
+                                    <!-- 일몰 -->
+                                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                        <TextBlock Text="🌇" FontSize="18" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SunsetTime}" FontSize="13" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Text="일몰" FontSize="10"
+                                                   Foreground="{DynamicResource TextMutedBrush}"
+                                                   HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                                <!-- 낮 시간 바 -->
+                                <Border Height="4" Background="#0FFFFFFF" CornerRadius="2" Margin="0,10,0,0">
+                                    <Border CornerRadius="2" HorizontalAlignment="Left" Width="125">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                                                <GradientStop Color="#FF9500" Offset="0"/>
+                                                <GradientStop Color="#FFD166" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                </Border>
+                                <TextBlock Text="{Binding DaylightDuration}" FontSize="10"
+                                           Foreground="{DynamicResource TextMutedBrush}"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ── 상단: 즐겨찾기 헤더 + 도시 리스트 ── -->
+                        <StackPanel>
+                            <!-- 헤더 -->
+                            <TextBlock Text="즐겨찾기" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Margin="0,0,0,12"/>
+                            <Border Height="1" Background="#0AFFFFFF" Margin="0,0,0,12"/>
+
+                            <!-- 도시 리스트 -->
+                            <ItemsControl ItemsSource="{Binding FavoriteCities}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border x:Name="cityBorder"
+                                                Background="#08FFFFFF"
+                                                BorderBrush="#0DFFFFFF" BorderThickness="1"
+                                                CornerRadius="12" Padding="10,10"
+                                                Margin="0,0,0,8" Cursor="Hand">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="28"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <!-- 국기 -->
+                                                <TextBlock Grid.Column="0" Text="{Binding FlagEmoji}"
+                                                           FontSize="20" VerticalAlignment="Center"/>
+                                                <!-- 도시 정보 -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                    <TextBlock Text="{Binding CityName}" FontSize="12" FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                        <TextBlock Text="{Binding Temperature, StringFormat='{}{0:0}°'}"
+                                                                   FontSize="11"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                        <TextBlock Text=" | " FontSize="11"
+                                                                   Foreground="{DynamicResource TextMutedBrush}"/>
+                                                        <TextBlock Text="{Binding IconCode, Converter={StaticResource WeatherIconConverter}}"
+                                                                   FontSize="11"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <!-- 활성 도트 -->
+                                                <Ellipse x:Name="activeDot" Grid.Column="2"
+                                                         Width="6" Height="6" Visibility="Collapsed"
+                                                         VerticalAlignment="Center">
+                                                    <Ellipse.Fill>
+                                                        <SolidColorBrush Color="#00E5FF"/>
+                                                    </Ellipse.Fill>
+                                                    <Ellipse.Effect>
+                                                        <DropShadowEffect Color="#00E5FF" BlurRadius="6"
+                                                                          ShadowDepth="0" Opacity="0.6"/>
+                                                    </Ellipse.Effect>
+                                                </Ellipse>
+                                            </Grid>
+                                        </Border>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                <Setter TargetName="cityBorder" Property="Background" Value="#1A4FA3FF"/>
+                                                <Setter TargetName="cityBorder" Property="BorderBrush" Value="#404FA3FF"/>
+                                                <Setter TargetName="activeDot" Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- 도시 추가 버튼 -->
+                            <Border Background="Transparent"
+                                    BorderBrush="#1EFFFFFF" BorderThickness="1"
+                                    CornerRadius="12" Padding="10,10"
+                                    Margin="0,4,0,0" Cursor="Hand">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="➕" FontSize="12" Margin="0,0,8,0"/>
+                                    <TextBlock Text="도시 추가" FontSize="12"
+                                               Foreground="{DynamicResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
             </Grid>
         </Grid>
     </Border>
