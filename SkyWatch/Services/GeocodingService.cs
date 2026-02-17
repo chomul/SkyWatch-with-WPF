@@ -14,21 +14,25 @@ public class GeocodingService
     private static readonly HttpClient _http = new();
 
 
+    private static string BuildGeoUrl(string query)
+    {
+        var key = ApiConfig.ApiKey;
+        var encodedQuery = Uri.EscapeDataString(query);
+        return $"{ApiConfig.GeoUrl}/direct?q={encodedQuery}&limit=5&appid={key}";
+    }
+
 
     /// <summary>
     /// 도시명으로 검색 → SearchResult 리스트 반환
     /// </summary>
     public async Task<List<SearchResult>> SearchCitiesAsync(string query)
     {
-        if (string.IsNullOrWhiteSpace(query))
+        if (string.IsNullOrWhiteSpace(query) || !ApiConfig.IsConfigured)
             return new List<SearchResult>();
 
-        var key = ApiConfig.ApiKey;
-
-        // Geocoding API 호출
-        var geoUrl = $"{ApiConfig.GeoUrl}/direct?q={Uri.EscapeDataString(query)}&limit=5&appid={key}";
+        var geoUrl = BuildGeoUrl(query);
         var geoJson = await _http.GetStringAsync(geoUrl);
-        var geoDoc = JsonDocument.Parse(geoJson);
+        using var geoDoc = JsonDocument.Parse(geoJson);
         var geoRoot = geoDoc.RootElement;
 
         if (geoRoot.ValueKind != JsonValueKind.Array || geoRoot.GetArrayLength() == 0)

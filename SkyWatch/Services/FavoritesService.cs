@@ -10,9 +10,7 @@ public class FavoritesService : IFavoritesService
 
     public FavoritesService()
     {
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SkyWatch");
-        Directory.CreateDirectory(appDataPath);
-        _filePath = Path.Combine(appDataPath, "favorites.json");
+        _filePath = AppDataPathProvider.GetFilePath("favorites.json");
     }
 
     public async Task<List<FavoriteCity>> LoadFavoritesAsync()

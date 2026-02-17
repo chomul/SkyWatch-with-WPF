@@ -66,16 +66,6 @@ public partial class HomeViewModel : ViewModelBase, IRecipient<SettingsChangedMe
 
         // 메시지 수신 등록
         WeakReferenceMessenger.Default.RegisterAll(this);
-
-        // 초기 데이터 로드 (MainViewModel에서 호출하므로 여기서는 생략하거나 유지)
-        // _ = LoadWeatherAsync("Seoul"); 
-        // MainViewModel 생성 시 HomeVM을 만들고 거기서 LoadWeather를 부르는 구조라면 중복 조심
-        // 현재 MainViewModel 코드를 보면 HomeVM = new HomeViewModel(...) 하고 
-        // MainVM.InitializeAsync -> LoadFavoritesWeatherAsync... 
-        // HomeVM 생성자에서 LoadWeatherAsync("Seoul")을 호출하면 앱 시작 시 서울 날씨를 무조건 로드함.
-        // 사용자가 마지막에 본 도시나 즐겨찾기가 있다면 그게 덮어써질 것임.
-        // 일단 기존 코드 유지.
-        _ = LoadWeatherAsync("Seoul");
     }
 
     public void Receive(SettingsChangedMessage message)
@@ -83,7 +73,6 @@ public partial class HomeViewModel : ViewModelBase, IRecipient<SettingsChangedMe
         // 단위 라벨 갱신
         UnitLabel = ApiConfig.UnitLabel;
         WindUnitLabel = ApiConfig.WindUnitLabel;
-
         // 날씨 데이터 새로고침
         if (CurrentWeather != null)
         {
@@ -96,40 +85,19 @@ public partial class HomeViewModel : ViewModelBase, IRecipient<SettingsChangedMe
     /// </summary>
     [RelayCommand]
     public async Task LoadWeatherAsync(string city)
-    {
-        try
-        {
-            IsLoading = true;
-            HasError = false;
-            ErrorMessage = string.Empty;
-
-            var weatherInfo = await _weatherService.GetWeatherAsync(city);
-
-            // 현재 날씨
-            CurrentWeather = weatherInfo.Current;
-
-            // 시간별 예보
-            HourlyForecasts = new ObservableCollection<HourlyForecast>(weatherInfo.HourlyForecasts);
-
-            // 주간 예보
-            DailyForecasts = new ObservableCollection<DailyForecast>(weatherInfo.DailyForecasts);
-        }
-        catch (Exception ex)
-        {
-            HasError = true;
-            ErrorMessage = $"날씨 데이터를 불러올 수 없습니다: {ex.Message}";
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
+        => await LoadWeatherCoreAsync(() => _weatherService.GetWeatherAsync(city), null);
 
     /// <summary>
     /// 위도/경도로 날씨 데이터를 로드합니다.
     /// cityName은 UI 표시용으로 사용됩니다.
     /// </summary>
     public async Task LoadWeatherAsync(double lat, double lon, string cityName)
+        => await LoadWeatherCoreAsync(() => _weatherService.GetWeatherAsync(lat, lon), cityName);
+
+    /// <summary>
+    /// 공통 날씨 로딩 로직 (string/좌표 기반 호출 통합)
+    /// </summary>
+    private async Task LoadWeatherCoreAsync(Func<Task<WeatherInfo>> weatherLoader, string? displayCityName)
     {
         try
         {
@@ -137,13 +105,12 @@ public partial class HomeViewModel : ViewModelBase, IRecipient<SettingsChangedMe
             HasError = false;
             ErrorMessage = string.Empty;
 
-            var weatherInfo = await _weatherService.GetWeatherAsync(lat, lon);
+            var weatherInfo = await weatherLoader();
 
-            // API에서 가져온 도시 이름 대신, 검색된(또는 저장된) 도시 이름을 우선 사용할 수 있음
-            // 여기서는 검색된 한글 이름을 유지하기 위해 덮어씁니다.
-            if (!string.IsNullOrEmpty(cityName))
+            // UI에 보여줄 도시 이름이 별도로 주어지면 우선 사용
+            if (!string.IsNullOrEmpty(displayCityName))
             {
-                weatherInfo.Current.CityName = cityName;
+                weatherInfo.Current.CityName = displayCityName;
             }
 
             // 현재 날씨

@@ -13,7 +13,7 @@ namespace SkyWatch.ViewModels;
 /// </summary>
 public partial class SearchViewModel : ViewModelBase
 {
-    private readonly GeocodingService _searchService = new();
+    private readonly GeocodingService _searchService;
 
     [ObservableProperty]
     private string _searchQuery = string.Empty;
@@ -24,11 +24,14 @@ public partial class SearchViewModel : ViewModelBase
     public ObservableCollection<SearchResult> SearchResults { get; } = new();
     public ObservableCollection<string> RecentSearches { get; } = new();
 
-    public SearchViewModel()
+    public SearchViewModel() : this(new GeocodingService())
+    {
+    }
+
+    public SearchViewModel(GeocodingService searchService)
     {
         Title = "도시 검색";
-
-
+        _searchService = searchService;
     }
 
     // 엔터 키 입력 시 검색 실행
@@ -40,6 +43,12 @@ public partial class SearchViewModel : ViewModelBase
 
     private async Task SearchCitiesAsync(string query)
     {
+        if (IsSearching)
+        {
+            // 이미 검색 중이면 추가 요청 무시
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(query))
         {
             SearchResults.Clear();

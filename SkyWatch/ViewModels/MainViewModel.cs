@@ -1,6 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Net.Http;
-using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -16,6 +14,12 @@ namespace SkyWatch.ViewModels;
 /// </summary>
 public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMessage>, IRecipient<ToggleFavoriteMessage>, IRecipient<SettingsChangedMessage>
 {
+    private sealed record CityInfo(
+        string CityName,
+        string CountryCode,
+        string FlagEmoji,
+        double Lat,
+        double Lon);
     private readonly IFavoritesService _favoritesService;
     private readonly IWeatherService _weatherService;
     private readonly ISettingsService _settingsService;
@@ -85,8 +89,19 @@ public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMe
         }
         await LoadFavoritesWeatherAsync();
 
-        // 초기 홈 화면 도시가 즐겨찾기인지 확인
-        CheckIfHomeIsFavorite();
+        // 3. 초기 홈 화면 도시 결정
+        if (FavoriteCities.Count > 0)
+        {
+            // IsActive가 지정된 도시가 있으면 우선 사용, 없으면 첫 번째 도시 사용
+            var initial = FavoriteCities.FirstOrDefault(c => c.IsActive) ?? FavoriteCities[0];
+            await SelectFavoriteCity(initial);
+        }
+        else
+        {
+            // 즐겨찾기가 없으면 기본 도시(Seoul) 로드
+            await HomeVM.LoadWeatherAsync("Seoul");
+            CheckIfHomeIsFavorite();
+        }
     }
 
     /// <summary>
@@ -142,44 +157,14 @@ public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMe
     [RelayCommand]
     private async Task ToggleFavorite(object data)
     {
-        if (data == null) return;
-
-        string cityName = "";
-        string countryCode = "";
-        string flagEmoji = "";
-        double lat = 0;
-        double lon = 0;
-
-        // 1. 데이터 타입에 따라 정보 추출
-        if (data is SearchResult searchResult)
-        {
-            cityName = searchResult.CityName;
-            countryCode = searchResult.CountryCode;
-            flagEmoji = searchResult.FlagEmoji;
-            lat = searchResult.Lat;
-            lon = searchResult.Lon;
-        }
-        else if (data is CurrentWeather weather)
-        {
-            cityName = weather.CityName;
-            countryCode = weather.CountryCode;
-            // CurrentWeather에는 Flag가 없으므로 Helper를 통해 생성
-            flagEmoji = SkyWatch.Helpers.CountryHelper.CountryCodeToFlag(countryCode);
-            lat = weather.Lat;
-            lon = weather.Lon;
-        }
-        else if (data is FavoriteCity favCity)
-        {
-            cityName = favCity.CityName;
-            lat = favCity.Lat;
-            lon = favCity.Lon;
-        }
+        if (!TryExtractCityInfo(data, out var info))
+            return;
 
         // 2. 이미 존재하는지 확인 (위경도 오차 고려하여 이름으로 비교하거나, 대략적인 좌표 비교)
         // 여기서는 이름과 국가코드로 1차 비교 후, 없으면 좌표로 비교
         var existing = FavoriteCities.FirstOrDefault(c =>
-            (c.CityName == cityName && c.CountryCode == countryCode) ||
-            (Math.Abs(c.Lat - lat) < 0.01 && Math.Abs(c.Lon - lon) < 0.01));
+            (c.CityName == info.CityName && c.CountryCode == info.CountryCode) ||
+            (Math.Abs(c.Lat - info.Lat) < 0.01 && Math.Abs(c.Lon - info.Lon) < 0.01));
 
         if (existing != null)
         {
@@ -191,11 +176,11 @@ public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMe
             // 추가
             var newFavorite = new FavoriteCity
             {
-                CityName = cityName,
-                CountryCode = countryCode,
-                FlagEmoji = flagEmoji, // CurrentWeather에서 온 경우 비어있을 수 있음
-                Lat = lat,
-                Lon = lon,
+                CityName = info.CityName,
+                CountryCode = info.CountryCode,
+                FlagEmoji = info.FlagEmoji, // CurrentWeather에서 온 경우 비어있을 수 있음
+                Lat = info.Lat,
+                Lon = info.Lon,
                 IsActive = false
             };
             FavoriteCities.Add(newFavorite);
@@ -209,6 +194,47 @@ public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMe
 
         // 4. 상태 업데이트
         CheckIfHomeIsFavorite();
+    }
+
+    /// <summary>
+    /// ToggleFavorite에 전달된 다양한 타입에서 공통 CityInfo를 추출
+    /// </summary>
+    private static bool TryExtractCityInfo(object data, out CityInfo info)
+    {
+        info = null!;
+
+        switch (data)
+        {
+            case SearchResult searchResult:
+                info = new CityInfo(
+                    searchResult.CityName,
+                    searchResult.CountryCode,
+                    searchResult.FlagEmoji,
+                    searchResult.Lat,
+                    searchResult.Lon);
+                return true;
+
+            case CurrentWeather weather:
+                info = new CityInfo(
+                    weather.CityName,
+                    weather.CountryCode,
+                    SkyWatch.Helpers.CountryHelper.CountryCodeToFlag(weather.CountryCode),
+                    weather.Lat,
+                    weather.Lon);
+                return true;
+
+            case FavoriteCity favCity:
+                info = new CityInfo(
+                    favCity.CityName,
+                    favCity.CountryCode,
+                    favCity.FlagEmoji,
+                    favCity.Lat,
+                    favCity.Lon);
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     private void CheckIfHomeIsFavorite()

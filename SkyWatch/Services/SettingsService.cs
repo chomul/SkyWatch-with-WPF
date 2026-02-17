@@ -15,9 +15,7 @@ public class SettingsService : ISettingsService
 
     public SettingsService()
     {
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SkyWatch");
-        Directory.CreateDirectory(appDataPath);
-        _filePath = Path.Combine(appDataPath, "settings.json");
+        _filePath = AppDataPathProvider.GetFilePath("settings.json");
     }
 
     public async Task LoadSettingsAsync()
