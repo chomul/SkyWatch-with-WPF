@@ -27,7 +27,7 @@ public static class ApiConfig
     public static string WindUnitLabel => Units == "metric" ? "m/s" : "mph";
 
     /// <summary>언어 (kr = 한국어 날씨 설명)</summary>
-    public const string Lang = "kr";
+    public static string Lang { get; set; } = "kr";
 
     /// <summary>
     /// appsettings.json에서 API 키를 로드합니다.

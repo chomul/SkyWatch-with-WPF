@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converters="clr-namespace:SkyWatch.Converters"
+             xmlns:services="clr-namespace:SkyWatch.Services"
              mc:Ignorable="d"
              d:DesignHeight="700" d:DesignWidth="900">
 
@@ -23,7 +24,7 @@
             <!-- ══════════════════════════════════════ -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,22"
                         HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="🔄 갱신"
+                <Button Content="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_Refresh], StringFormat='🔄 {0}'}"
                         Command="{Binding RefreshWeatherCommand}"
                         Background="#0FFFFFFF" Foreground="{DynamicResource TextSecondaryBrush}"
                         BorderBrush="#1AFFFFFF" BorderThickness="1"
@@ -120,9 +121,15 @@
                                 <TextBlock Text="{Binding CurrentWeather.Description}"
                                            FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
                                            VerticalAlignment="Center"/>
-                                <TextBlock Text=" · 오늘" FontSize="14"
+                                <TextBlock FontSize="14"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                           VerticalAlignment="Center"/>
+                                           VerticalAlignment="Center">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat=" · {0}">
+                                            <Binding Source="{x:Static services:LocalizationManager.Instance}" Path="[Home_Today]"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
                             </StackPanel>
 
                             <!-- 큰 온도 표시 -->
@@ -161,7 +168,8 @@
                                 <TextBlock FontSize="13" Foreground="{DynamicResource TextMutedBrush}" Margin="16,0,0,0"
                                            VerticalAlignment="Center">
                                     <TextBlock.Text>
-                                        <MultiBinding StringFormat="체감 {0:0}°">
+                                        <MultiBinding StringFormat="{}{0} {1:0}°">
+                                            <Binding Source="{x:Static services:LocalizationManager.Instance}" Path="[Home_FeelsLike]"/>
                                             <Binding Path="CurrentWeather.FeelsLike"/>
                                         </MultiBinding>
                                     </TextBlock.Text>
@@ -192,7 +200,8 @@
                         CornerRadius="16" Padding="18" Margin="0,0,7,0">
                     <StackPanel>
                         <TextBlock Text="💧" FontSize="20" Margin="0,0,0,2"/>
-                        <TextBlock Text="습도" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_Humidity]}" 
+                                   FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
                                    Margin="0,0,0,6"/>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding CurrentWeather.Humidity}"
@@ -202,7 +211,8 @@
                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                        VerticalAlignment="Bottom" Margin="2,0,0,2"/>
                         </StackPanel>
-                        <TextBlock Text="평균 이하" FontSize="11"
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_BelowAvg]}" 
+                                   FontSize="11"
                                    Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
@@ -212,7 +222,8 @@
                         CornerRadius="16" Padding="18" Margin="7,0,7,0">
                     <StackPanel>
                         <TextBlock Text="💨" FontSize="20" Margin="0,0,0,2"/>
-                        <TextBlock Text="풍속" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_Wind]}" 
+                                   FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
                                    Margin="0,0,0,6"/>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding CurrentWeather.WindSpeed, StringFormat='{}{0:0.0}'}"
@@ -232,7 +243,8 @@
                         CornerRadius="16" Padding="18" Margin="7,0,7,0">
                     <StackPanel>
                         <TextBlock Text="👁" FontSize="20" Margin="0,0,0,2"/>
-                        <TextBlock Text="가시거리" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_Visibility]}" 
+                                   FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
                                    Margin="0,0,0,6"/>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding CurrentWeather.Visibility, StringFormat='{}{0:0}'}"
@@ -242,7 +254,8 @@
                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                        VerticalAlignment="Bottom" Margin="2,0,0,2"/>
                         </StackPanel>
-                        <TextBlock Text="매우 좋음" FontSize="11"
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_VeryGood]}" 
+                                   FontSize="11"
                                    Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
@@ -252,7 +265,8 @@
                         CornerRadius="16" Padding="18" Margin="7,0,0,0">
                     <StackPanel>
                         <TextBlock Text="☀️" FontSize="20" Margin="0,0,0,2"/>
-                        <TextBlock Text="UV 지수" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_UV]}" 
+                                   FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
                                    Margin="0,0,0,6"/>
                         <TextBlock Text="{Binding CurrentWeather.UvIndex}" FontSize="22" FontWeight="SemiBold"
                                    Foreground="{DynamicResource AccentWarmBrush}"/>
@@ -279,7 +293,8 @@
                     <StackPanel>
                         <!-- 섹션 타이틀 -->
                         <DockPanel Margin="0,0,0,18">
-                            <TextBlock Text="시간별 예보" FontSize="12" FontWeight="SemiBold"
+                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_Hourly]}" 
+                                       FontSize="12" FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextMutedBrush}"
                                        VerticalAlignment="Center"/>
                             <Border Height="1" Background="#0FFFFFFF" Margin="8,0,0,0"
@@ -336,7 +351,11 @@
                                                 </Setter.Value>
                                             </Setter>
                                             <Setter TargetName="hourBorder" Property="BorderBrush" Value="#594FA3FF"/>
-                                            <Setter TargetName="timeText" Property="Text" Value="지금"/>
+                                            <Setter TargetName="timeText" Property="Text">
+                                                <Setter.Value>
+                                                    <Binding Source="{x:Static services:LocalizationManager.Instance}" Path="[Home_Now]"/>
+                                                </Setter.Value>
+                                            </Setter>
                                             <Setter TargetName="timeText" Property="Foreground"
                                                     Value="{StaticResource AccentCyanBrush}"/>
                                         </DataTrigger>
@@ -358,7 +377,8 @@
                     <StackPanel>
                         <!-- 섹션 타이틀 -->
                         <DockPanel Margin="0,0,0,18">
-                            <TextBlock Text="주간 예보" FontSize="12" FontWeight="SemiBold"
+                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Home_Daily]}" 
+                                       FontSize="12" FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextMutedBrush}"
                                        VerticalAlignment="Center"/>
                             <Border Height="1" Background="#0FFFFFFF" Margin="8,0,0,0"

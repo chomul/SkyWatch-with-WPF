@@ -152,7 +152,10 @@ public class OpenWeatherService : IWeatherService
     private static List<DailyForecast> ParseDailyForecasts(JsonElement root)
     {
         var list = root.GetProperty("list");
-        var dayNames = new[] { "일", "월", "화", "수", "목", "금", "토" };
+        var isKr = ApiConfig.Lang == "kr";
+        var dayNames = isKr
+            ? new[] { "일", "월", "화", "수", "목", "금", "토" }
+            : new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
         // 날짜별로 그룹핑
         var groups = new Dictionary<DateOnly, List<JsonElement>>();
@@ -205,9 +208,10 @@ public class OpenWeatherService : IWeatherService
 
             allTemps.Add((maxTemp, minTemp));
 
-            var dayLabel = date == today ? "오늘"
-                : date == today.AddDays(1) ? "내일"
-                : dayNames[(int)date.DayOfWeek];
+            var dayLabel = "";
+            if (date == today) dayLabel = isKr ? "오늘" : "Today";
+            else if (date == today.AddDays(1)) dayLabel = isKr ? "내일" : "Tomorrow";
+            else dayLabel = dayNames[(int)date.DayOfWeek];
 
             results.Add(new DailyForecast
             {
@@ -240,12 +244,16 @@ public class OpenWeatherService : IWeatherService
     }
 
     /// <summary>
-    /// 풍향 각도(0~360) → 한국어 방위명
+    /// 풍향 각도(0~360) → 방위명 (언어 설정 반영)
     /// </summary>
     private static string DegreesToDirection(int degrees)
     {
-        var dirs = new[] { "북", "북동", "동", "남동", "남", "남서", "서", "북서" };
+        var isKr = ApiConfig.Lang == "kr";
+        var dirs = isKr
+            ? new[] { "북", "북동", "동", "남동", "남", "남서", "서", "북서" }
+            : new[] { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
+
         var index = (int)Math.Round(degrees / 45.0) % 8;
-        return dirs[index] + "풍";
+        return dirs[index] + (isKr ? "풍" : "");
     }
 }

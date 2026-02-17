@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:services="clr-namespace:SkyWatch.Services"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
 
@@ -46,7 +47,7 @@
                 </TextBox>
                 <!-- Placeholder 텍스트 (쿼리 비어있을 때) -->
                 <TextBlock Grid.Column="1"
-                           Text="도시를 검색하세요..."
+                           Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Search_Placeholder]}"
                            FontSize="14"
                            Foreground="{DynamicResource TextMutedBrush}"
                            VerticalAlignment="Center"
@@ -87,7 +88,8 @@
         <!-- 검색 결과 헤더                           -->
         <!-- ══════════════════════════════════════ -->
         <TextBlock Grid.Row="1"
-                   Text="검색 결과" FontSize="11"
+                   Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Search_Results]}" 
+                   FontSize="11"
                    Foreground="{DynamicResource TextMutedBrush}"
                    Margin="0,0,0,10">
             <TextBlock.Style>
@@ -161,7 +163,8 @@
         <!-- 최근 검색                               -->
         <!-- ══════════════════════════════════════ -->
         <StackPanel Grid.Row="3" Margin="0,16,0,0">
-            <TextBlock Text="📌 최근 검색" FontSize="11"
+            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Search_Recent], StringFormat='📌 {0}'}" 
+                       FontSize="11"
                        Foreground="{DynamicResource TextMutedBrush}"
                        Margin="0,0,0,8"/>
             <ItemsControl ItemsSource="{Binding RecentSearches}">
@@ -204,7 +207,7 @@
                 </Style>
             </StackPanel.Style>
             <TextBlock Text="🔍" FontSize="40" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-            <TextBlock Text="도시 이름을 입력하면 검색 결과가 표시됩니다"
+            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Search_Guide]}"
                        FontSize="13"
                        Foreground="{DynamicResource TextMutedBrush}"
                        HorizontalAlignment="Center"/>

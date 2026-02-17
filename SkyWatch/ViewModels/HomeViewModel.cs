@@ -12,9 +12,10 @@ namespace SkyWatch.ViewModels;
 /// 홈 화면 ViewModel — 현재 날씨 + 시간별/주간 예보 표시
 /// MockWeatherService에서 데이터를 로드하여 View에 바인딩합니다.
 /// </summary>
-public partial class HomeViewModel : ViewModelBase
+public partial class HomeViewModel : ViewModelBase, IRecipient<SettingsChangedMessage>
 {
     private readonly IWeatherService _weatherService;
+    private readonly ISettingsService _settingsService;
 
     // ── 현재 날씨 ──
 
@@ -53,17 +54,41 @@ public partial class HomeViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isFavorite;
 
-    public HomeViewModel() : this(new OpenWeatherService())
+    public HomeViewModel() : this(new OpenWeatherService(), new SettingsService())
     {
     }
 
-    public HomeViewModel(IWeatherService weatherService)
+    public HomeViewModel(IWeatherService weatherService, ISettingsService settingsService)
     {
         Title = "홈";
         _weatherService = weatherService;
+        _settingsService = settingsService;
 
-        // 초기 데이터 로드
+        // 메시지 수신 등록
+        WeakReferenceMessenger.Default.RegisterAll(this);
+
+        // 초기 데이터 로드 (MainViewModel에서 호출하므로 여기서는 생략하거나 유지)
+        // _ = LoadWeatherAsync("Seoul"); 
+        // MainViewModel 생성 시 HomeVM을 만들고 거기서 LoadWeather를 부르는 구조라면 중복 조심
+        // 현재 MainViewModel 코드를 보면 HomeVM = new HomeViewModel(...) 하고 
+        // MainVM.InitializeAsync -> LoadFavoritesWeatherAsync... 
+        // HomeVM 생성자에서 LoadWeatherAsync("Seoul")을 호출하면 앱 시작 시 서울 날씨를 무조건 로드함.
+        // 사용자가 마지막에 본 도시나 즐겨찾기가 있다면 그게 덮어써질 것임.
+        // 일단 기존 코드 유지.
         _ = LoadWeatherAsync("Seoul");
+    }
+
+    public void Receive(SettingsChangedMessage message)
+    {
+        // 단위 라벨 갱신
+        UnitLabel = ApiConfig.UnitLabel;
+        WindUnitLabel = ApiConfig.WindUnitLabel;
+
+        // 날씨 데이터 새로고침
+        if (CurrentWeather != null)
+        {
+            _ = LoadWeatherAsync(CurrentWeather.Lat, CurrentWeather.Lon, CurrentWeather.CityName);
+        }
     }
 
     /// <summary>
@@ -157,12 +182,14 @@ public partial class HomeViewModel : ViewModelBase
     [RelayCommand]
     private async Task ToggleUnitAsync()
     {
+        // 1. 설정 변경
         ApiConfig.Units = ApiConfig.Units == "metric" ? "imperial" : "metric";
-        UnitLabel = ApiConfig.UnitLabel;
-        WindUnitLabel = ApiConfig.WindUnitLabel;
 
-        var city = CurrentWeather?.CityName ?? "Seoul";
-        await LoadWeatherAsync(city);
+        // 2. 저장
+        await _settingsService.SaveSettingsAsync();
+
+        // 3. 변경 알림 전송 (이 메시지를 자신이 수신하여 Receive 메서드에서 날씨를 새로고침함)
+        WeakReferenceMessenger.Default.Send(new SettingsChangedMessage("Unit"));
     }
     [RelayCommand]
     private void SendToggleFavorite()

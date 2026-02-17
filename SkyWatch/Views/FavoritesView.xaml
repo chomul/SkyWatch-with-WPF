@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converters="clr-namespace:SkyWatch.Converters"
+             xmlns:services="clr-namespace:SkyWatch.Services"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
 
@@ -15,11 +16,13 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="28">
                 <!-- 헤더 -->
-                <TextBlock Text="즐겨찾기" FontSize="20" FontWeight="SemiBold"
+                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Fav_Title]}"
+                           FontSize="20" FontWeight="SemiBold"
                            Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,16"/>
 
                 <!-- 즐겨찾기 목록 -->
                 <ListBox ItemsSource="{Binding FavoriteCities}"
+                         SelectedItem="{Binding SelectedCity}"
                          Background="Transparent" BorderThickness="0"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          HorizontalContentAlignment="Stretch">
@@ -38,16 +41,12 @@
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Background="#0BFFFFFF" BorderBrush="#1AFFFFFF" BorderThickness="1"
+                            <Border x:Name="cityBorder" Background="#0BFFFFFF" BorderBrush="#1AFFFFFF" BorderThickness="1"
                                     CornerRadius="12" Padding="16" Cursor="Hand">
-                                <Border.InputBindings>
-                                    <MouseBinding Gesture="LeftClick" 
-                                                  Command="{Binding DataContext.SelectFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                  CommandParameter="{Binding}"/>
-                                </Border.InputBindings>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
@@ -74,8 +73,21 @@
                                                    VerticalAlignment="Center"/>
                                     </StackPanel>
 
+                                    <!-- 활성 도트 -->
+                                    <Ellipse x:Name="activeDot" Grid.Column="2"
+                                             Width="6" Height="6" Visibility="Collapsed"
+                                             VerticalAlignment="Center" Margin="0,0,12,0">
+                                        <Ellipse.Fill>
+                                            <SolidColorBrush Color="#00E5FF"/>
+                                        </Ellipse.Fill>
+                                        <Ellipse.Effect>
+                                            <DropShadowEffect Color="#00E5FF" BlurRadius="6"
+                                                              ShadowDepth="0" Opacity="0.6"/>
+                                        </Ellipse.Effect>
+                                    </Ellipse>
+
                                     <!-- 오른쪽: 삭제 버튼 -->
-                                    <Button Grid.Column="2" 
+                                    <Button Grid.Column="3" 
                                             Command="{Binding DataContext.DeleteFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}"
                                             VerticalAlignment="Center"
@@ -98,9 +110,35 @@
                                     </Button>
                                 </Grid>
                             </Border>
+                            <DataTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="cityBorder" Property="Background" Value="#12FFFFFF"/>
+                                </Trigger>
+                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                    <Setter TargetName="cityBorder" Property="Background" Value="#1A4FA3FF"/>
+                                    <Setter TargetName="cityBorder" Property="BorderBrush" Value="#404FA3FF"/>
+                                    <Setter TargetName="activeDot" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+
+                <!-- 빈 목록 안내 -->
+                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Fav_Empty]}"
+                           FontSize="14" Foreground="{DynamicResource TextMutedBrush}"
+                           HorizontalAlignment="Center" Margin="0,48,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding FavoriteCities.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </StackPanel>
         </ScrollViewer>
     </Grid>

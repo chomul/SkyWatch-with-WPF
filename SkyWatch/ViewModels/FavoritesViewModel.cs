@@ -21,23 +21,37 @@ public partial class FavoritesViewModel : ViewModelBase
         _favoriteCities = favorites;
     }
 
-    [RelayCommand]
-    private void SelectFavorite(FavoriteCity city)
-    {
-        if (city == null) return;
+    [ObservableProperty]
+    private FavoriteCity? _selectedCity;
 
-        // SearchResult로 변환하여 메시지 전송
+    partial void OnSelectedCityChanged(FavoriteCity? value)
+    {
+        if (value == null) return;
+
+        // 선택 상태 동기화 (IsActive 업데이트)
+        foreach (var city in FavoriteCities)
+        {
+            city.IsActive = (city == value);
+        }
+
+        // 메시지 전송
         var searchResult = new SearchResult
         {
-            CityName = city.CityName,
-            CountryName = city.CountryCode, // FavoriteCity에는 CountryName이 없으므로 Code 사용
-            CountryCode = city.CountryCode,
-            FlagEmoji = city.FlagEmoji,
-            Lat = city.Lat,
-            Lon = city.Lon
+            CityName = value.CityName,
+            CountryName = value.CountryCode,
+            CountryCode = value.CountryCode,
+            FlagEmoji = value.FlagEmoji,
+            Lat = value.Lat,
+            Lon = value.Lon
         };
 
         WeakReferenceMessenger.Default.Send(new CitySelectedMessage(searchResult));
+    }
+
+    [RelayCommand]
+    private void SelectFavorite(FavoriteCity city)
+    {
+        SelectedCity = city;
     }
 
     [RelayCommand]

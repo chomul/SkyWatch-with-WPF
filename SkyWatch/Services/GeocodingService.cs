@@ -66,12 +66,14 @@ public class GeocodingService
             var lat = city.GetProperty("lat").GetDouble();
             var lon = city.GetProperty("lon").GetDouble();
 
-            // 한국어 이름이 있으면 사용
+            // 언어 설정에 따른 도시명 선택
             var localName = name;
+            var targetLang = ApiConfig.Lang == "kr" ? "ko" : "en";
+
             if (city.TryGetProperty("local_names", out var localNames)
-                && localNames.TryGetProperty("ko", out var koName))
+                && localNames.TryGetProperty(targetLang, out var localizedName))
             {
-                localName = koName.GetString() ?? name;
+                localName = localizedName.GetString() ?? name;
             }
 
             // 주(state) 정보

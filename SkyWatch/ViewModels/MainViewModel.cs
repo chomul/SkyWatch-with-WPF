@@ -14,10 +14,11 @@ namespace SkyWatch.ViewModels;
 /// 메인 ViewModel — 네비게이션 + 즐겨찾기 패널 관리
 /// 즐겨찾기 도시의 실제 날씨를 API에서 로드합니다.
 /// </summary>
-public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMessage>, IRecipient<ToggleFavoriteMessage>
+public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMessage>, IRecipient<ToggleFavoriteMessage>, IRecipient<SettingsChangedMessage>
 {
     private readonly IFavoritesService _favoritesService;
     private readonly IWeatherService _weatherService;
+    private readonly ISettingsService _settingsService;
 
     [ObservableProperty]
     private ViewModelBase _currentView;
@@ -40,24 +41,29 @@ public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMe
     public HomeViewModel HomeVM { get; } = new();
     public SearchViewModel SearchVM { get; } = new();
     public FavoritesViewModel FavoritesVM { get; }
-    public SettingsViewModel SettingsVM { get; } = new();
+    public SettingsViewModel SettingsVM { get; }
 
-    public MainViewModel() : this(new FavoritesService(), new OpenWeatherService())
+    public MainViewModel() : this(new FavoritesService(), new OpenWeatherService(), new SettingsService())
     {
     }
 
-    public MainViewModel(IFavoritesService favoritesService, IWeatherService weatherService)
+    public MainViewModel(IFavoritesService favoritesService, IWeatherService weatherService, ISettingsService settingsService)
     {
         _favoritesService = favoritesService;
         _weatherService = weatherService;
+        _settingsService = settingsService;
 
+        HomeVM = new HomeViewModel(_weatherService, _settingsService);
         _currentView = HomeVM;
         _selectedNavIndex = 0;
 
         // FavoritesVM은 MainVM의 컬렉션을 공유
         FavoritesVM = new FavoritesViewModel(FavoriteCities);
 
-        // 초기화 (즐겨찾기 로드 → 날씨 업데이트)
+        // SettingsVM 생성
+        SettingsVM = new SettingsViewModel(_settingsService);
+
+        // 초기화 (설정 로드 → 즐겨찾기 로드 → 날씨 업데이트)
         _ = InitializeAsync();
 
         // 메시지 수신 등록
@@ -66,6 +72,11 @@ public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMe
 
     private async Task InitializeAsync()
     {
+        // 1. 설정 로드
+        await _settingsService.LoadSettingsAsync();
+        SettingsVM.LoadCurrentSettings();
+
+        // 2. 즐겨찾기 로드
         var favorites = await _favoritesService.LoadFavoritesAsync();
         FavoriteCities.Clear();
         foreach (var city in favorites)
@@ -103,6 +114,25 @@ public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMe
     {
         // ToggleFavorite 커맨드 실행
         _ = ToggleFavorite(message.Value);
+    }
+
+    /// <summary>
+    /// 설정 변경 메시지 수신 (언어/단위 변경 시 일출/일몰 텍스트 갱신 등을 위해)
+    /// </summary>
+    public void Receive(SettingsChangedMessage message)
+    {
+        var activeCity = FavoriteCities.FirstOrDefault(c => c.IsActive);
+        if (activeCity != null)
+        {
+            // 언어 변경 시 낮 길이 텍스트 등을 갱신하기 위해 재호출
+            _ = UpdateSunriseSunsetAsync(activeCity);
+        }
+
+        // 단위 변경 시 즐겨찾기 목록의 온도를 갱신해야 함 via API reload
+        if (message.Value == "Unit")
+        {
+            _ = LoadFavoritesWeatherAsync();
+        }
     }
 
     /// <summary>
@@ -250,13 +280,15 @@ public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMe
 
             SunriseTime = sunrise.ToString("HH:mm");
             SunsetTime = sunset.ToString("HH:mm");
-            DaylightDuration = $"낮 {daylight.Hours}시간 {daylight.Minutes}분";
+
+            var format = LocalizationManager.Instance["Format_Daylight"]; // "Daylight {0}h {1}m"
+            DaylightDuration = string.Format(format, daylight.Hours, daylight.Minutes);
         }
         catch
         {
             SunriseTime = "--:--";
             SunsetTime = "--:--";
-            DaylightDuration = "정보 없음";
+            DaylightDuration = "";
         }
     }
 

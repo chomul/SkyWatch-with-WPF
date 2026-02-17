@@ -19,6 +19,55 @@ public static class CountryHelper
     /// </summary>
     public static string CountryCodeToName(string code)
     {
+        if (SkyWatch.Services.ApiConfig.Lang != "kr")
+        {
+            // 영어 국가명 (또는 원어 코드 그대로 반환)
+            // 여기서는 주요 국가만 영어로 매핑하거나, 코드로 반환
+            return code switch
+            {
+                "KR" => "South Korea",
+                "JP" => "Japan",
+                "US" => "USA",
+                "GB" => "UK",
+                "FR" => "France",
+                "DE" => "Germany",
+                "CN" => "China",
+                "TW" => "Taiwan",
+                "HK" => "Hong Kong",
+                "SG" => "Singapore",
+                "TH" => "Thailand",
+                "VN" => "Vietnam",
+                "PH" => "Philippines",
+                "ID" => "Indonesia",
+                "MY" => "Malaysia",
+                "IN" => "India",
+                "AU" => "Australia",
+                "CA" => "Canada",
+                "IT" => "Italy",
+                "ES" => "Spain",
+                "RU" => "Russia",
+                "BR" => "Brazil",
+                "MX" => "Mexico",
+                "NZ" => "New Zealand",
+                "SE" => "Sweden",
+                "NO" => "Norway",
+                "FI" => "Finland",
+                "DK" => "Denmark",
+                "NL" => "Netherlands",
+                "CH" => "Switzerland",
+                "AT" => "Austria",
+                "BE" => "Belgium",
+                "PT" => "Portugal",
+                "PL" => "Poland",
+                "CZ" => "Czech Republic",
+                "TR" => "Turkey",
+                "EG" => "Egypt",
+                "AE" => "UAE",
+                "SA" => "Saudi Arabia",
+                _ => code
+            };
+        }
+
         return code switch
         {
             "KR" => "대한민국",

@@ -3,20 +3,89 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:SkyWatch.ViewModels"
+             xmlns:services="clr-namespace:SkyWatch.Services"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
 
     <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="⚙️" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12"/>
-            <TextBlock Text="설정"
-                       FontSize="20" FontWeight="SemiBold"
+        <StackPanel Margin="40">
+            <!-- 헤더 -->
+            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Settings_Title]}"
+                       FontSize="28" FontWeight="Bold"
                        Foreground="{DynamicResource TextPrimaryBrush}"
-                       HorizontalAlignment="Center"/>
-            <TextBlock Text="Stage 6에서 설정 화면이 여기에 구현됩니다"
-                       FontSize="13"
-                       Foreground="{DynamicResource TextMutedBrush}"
-                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                       Margin="0,0,0,32"/>
+
+            <!-- 설정 항목 리스트 -->
+            <StackPanel>
+                <!-- 1. 단위 설정 -->
+                <Border Background="#08FFFFFF" CornerRadius="12" Padding="20" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Settings_Unit]}" 
+                                   FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12"/>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Settings_Celsius]}" 
+                                         GroupName="Unit"
+                                         IsChecked="{Binding IsCelsius}"
+                                         Command="{Binding ChangeUnitCommand}" CommandParameter="metric"
+                                         Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14"
+                                         Margin="0,0,24,0" Cursor="Hand"/>
+                            
+                            <RadioButton Content="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Settings_Fahrenheit]}" 
+                                         GroupName="Unit"
+                                         IsChecked="{Binding IsFahrenheit}"
+                                         Command="{Binding ChangeUnitCommand}" CommandParameter="imperial"
+                                         Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14"
+                                         Cursor="Hand"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 2. 언어 설정 -->
+                <Border Background="#08FFFFFF" CornerRadius="12" Padding="20" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Settings_LangHeader]}" 
+                                   FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12"/>
+
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="한국어" GroupName="Lang"
+                                         IsChecked="{Binding IsKorean}"
+                                         Command="{Binding ChangeLanguageCommand}" CommandParameter="kr"
+                                         Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14"
+                                         Margin="0,0,24,0" Cursor="Hand"/>
+
+                            <RadioButton Content="English" GroupName="Lang"
+                                         IsChecked="{Binding IsEnglish}"
+                                         Command="{Binding ChangeLanguageCommand}" CommandParameter="en"
+                                         Foreground="{DynamicResource TextSecondaryBrush}" FontSize="14"
+                                         Cursor="Hand"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 3. 정보 -->
+                <Border Background="#08FFFFFF" CornerRadius="12" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Settings_Info]}" 
+                                   FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Settings_App]}" 
+                                       Foreground="{DynamicResource TextMutedBrush}"/>
+                            <TextBlock Text=" SkyWatch" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Path=[Settings_Ver]}" 
+                                       Foreground="{DynamicResource TextMutedBrush}"/>
+                            <TextBlock Text=" 1.0.0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>
