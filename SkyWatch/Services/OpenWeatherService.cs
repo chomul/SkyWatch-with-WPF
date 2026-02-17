@@ -19,7 +19,8 @@ public class OpenWeatherService : IWeatherService
         var lang = ApiConfig.Lang;
 
         // ── 1. 현재 날씨 ──
-        var currentUrl = $"{ApiConfig.BaseUrl}/weather?q={city}&appid={key}&units={units}&lang={lang}";
+        var encodedCity = Uri.EscapeDataString(city);
+        var currentUrl = $"{ApiConfig.BaseUrl}/weather?q={encodedCity}&appid={key}&units={units}&lang={lang}";
         var currentJson = await _http.GetStringAsync(currentUrl);
         var currentDoc = JsonDocument.Parse(currentJson);
         var currentRoot = currentDoc.RootElement;
@@ -27,7 +28,38 @@ public class OpenWeatherService : IWeatherService
         var current = ParseCurrentWeather(currentRoot);
 
         // ── 2. 5일/3시간 예보 ──
-        var forecastUrl = $"{ApiConfig.BaseUrl}/forecast?q={city}&appid={key}&units={units}&lang={lang}";
+        var forecastUrl = $"{ApiConfig.BaseUrl}/forecast?q={encodedCity}&appid={key}&units={units}&lang={lang}";
+        var forecastJson = await _http.GetStringAsync(forecastUrl);
+        var forecastDoc = JsonDocument.Parse(forecastJson);
+        var forecastRoot = forecastDoc.RootElement;
+
+        var hourly = ParseHourlyForecasts(forecastRoot);
+        var daily = ParseDailyForecasts(forecastRoot);
+
+        return new WeatherInfo
+        {
+            Current = current,
+            HourlyForecasts = hourly,
+            DailyForecasts = daily
+        };
+    }
+
+    public async Task<WeatherInfo> GetWeatherAsync(double lat, double lon)
+    {
+        var key = ApiConfig.ApiKey;
+        var units = ApiConfig.Units;
+        var lang = ApiConfig.Lang;
+
+        // ── 1. 현재 날씨 ──
+        var currentUrl = $"{ApiConfig.BaseUrl}/weather?lat={lat}&lon={lon}&appid={key}&units={units}&lang={lang}";
+        var currentJson = await _http.GetStringAsync(currentUrl);
+        var currentDoc = JsonDocument.Parse(currentJson);
+        var currentRoot = currentDoc.RootElement;
+
+        var current = ParseCurrentWeather(currentRoot);
+
+        // ── 2. 5일/3시간 예보 ──
+        var forecastUrl = $"{ApiConfig.BaseUrl}/forecast?lat={lat}&lon={lon}&appid={key}&units={units}&lang={lang}";
         var forecastJson = await _http.GetStringAsync(forecastUrl);
         var forecastDoc = JsonDocument.Parse(forecastJson);
         var forecastRoot = forecastDoc.RootElement;

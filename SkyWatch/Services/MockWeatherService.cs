@@ -13,7 +13,19 @@ public class MockWeatherService : IWeatherService
     {
         // 네트워크 호출을 시뮬레이션 (UI 로딩 상태 테스트용)
         await Task.Delay(500);
+        return CreateMockWeather(city);
+    }
 
+    public async Task<WeatherInfo> GetWeatherAsync(double lat, double lon)
+    {
+        // 네트워크 호출을 시뮬레이션 (UI 로딩 상태 테스트용)
+        await Task.Delay(500);
+        // 좌표 기반이라도 테스트용으로 서울 날씨 반환
+        return CreateMockWeather("Seoul");
+    }
+
+    private WeatherInfo CreateMockWeather(string city)
+    {
         var now = DateTime.Now;
 
         return new WeatherInfo

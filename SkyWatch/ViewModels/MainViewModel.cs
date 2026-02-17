@@ -3,6 +3,8 @@ using System.Net.Http;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using SkyWatch.Messages;
 using SkyWatch.Models;
 using SkyWatch.Services;
 
@@ -12,7 +14,7 @@ namespace SkyWatch.ViewModels;
 /// 메인 ViewModel — 네비게이션 + 즐겨찾기 패널 관리
 /// 즐겨찾기 도시의 실제 날씨를 API에서 로드합니다.
 /// </summary>
-public partial class MainViewModel : ObservableObject
+public partial class MainViewModel : ObservableObject, IRecipient<CitySelectedMessage>
 {
     private static readonly HttpClient _http = new();
 
@@ -45,6 +47,23 @@ public partial class MainViewModel : ObservableObject
         _selectedNavIndex = 0;
         InitializeFavorites();
         _ = LoadFavoritesWeatherAsync();
+
+        // 메시지 수신 등록
+        WeakReferenceMessenger.Default.Register(this);
+    }
+
+    /// <summary>
+    /// 도시 선택 메시지 수신 시 호출
+    /// </summary>
+    public void Receive(CitySelectedMessage message)
+    {
+        var city = message.Value;
+
+        // 홈 화면으로 이동
+        NavigateTo("Home");
+
+        // 홈 화면에 날씨 로드 요청 (위경도 기반)
+        _ = HomeVM.LoadWeatherAsync(city.Lat, city.Lon, city.CityName);
     }
 
     /// <summary>

@@ -17,6 +17,12 @@ public class SearchResult
     /// <summary>현재 온도</summary>
     public double Temperature { get; set; }
 
+    /// <summary>위도</summary>
+    public double Lat { get; set; }
+
+    /// <summary>경도</summary>
+    public double Lon { get; set; }
+
     /// <summary>최상위 결과 여부 (하이라이트용)</summary>
     public bool IsTopResult { get; set; }
 }

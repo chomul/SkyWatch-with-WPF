@@ -113,6 +113,11 @@
                             Background="#08FFFFFF"
                             CornerRadius="10" Padding="12,10"
                             Margin="0,0,0,8" Cursor="Hand">
+                        <Border.InputBindings>
+                            <MouseBinding Gesture="LeftClick"
+                                          Command="{Binding DataContext.SelectCityCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                          CommandParameter="{Binding}"/>
+                        </Border.InputBindings>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="36"/>

@@ -148,7 +148,9 @@ public class GeocodingService
                 CityName = localName,
                 CountryName = displayCountry,
                 FlagEmoji = CountryCodeToFlag(country),
-                Temperature = temp
+                Temperature = temp,
+                Lat = lat,
+                Lon = lon
             };
         }
         catch

@@ -63,7 +63,7 @@ public partial class HomeViewModel : ViewModelBase
     /// 날씨 데이터를 로드합니다. 로딩/에러 상태를 자동 관리합니다.
     /// </summary>
     [RelayCommand]
-    private async Task LoadWeatherAsync(string city)
+    public async Task LoadWeatherAsync(string city)
     {
         try
         {
@@ -72,6 +72,47 @@ public partial class HomeViewModel : ViewModelBase
             ErrorMessage = string.Empty;
 
             var weatherInfo = await _weatherService.GetWeatherAsync(city);
+
+            // 현재 날씨
+            CurrentWeather = weatherInfo.Current;
+
+            // 시간별 예보
+            HourlyForecasts = new ObservableCollection<HourlyForecast>(weatherInfo.HourlyForecasts);
+
+            // 주간 예보
+            DailyForecasts = new ObservableCollection<DailyForecast>(weatherInfo.DailyForecasts);
+        }
+        catch (Exception ex)
+        {
+            HasError = true;
+            ErrorMessage = $"날씨 데이터를 불러올 수 없습니다: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// 위도/경도로 날씨 데이터를 로드합니다.
+    /// cityName은 UI 표시용으로 사용됩니다.
+    /// </summary>
+    public async Task LoadWeatherAsync(double lat, double lon, string cityName)
+    {
+        try
+        {
+            IsLoading = true;
+            HasError = false;
+            ErrorMessage = string.Empty;
+
+            var weatherInfo = await _weatherService.GetWeatherAsync(lat, lon);
+
+            // API에서 가져온 도시 이름 대신, 검색된(또는 저장된) 도시 이름을 우선 사용할 수 있음
+            // 여기서는 검색된 한글 이름을 유지하기 위해 덮어씁니다.
+            if (!string.IsNullOrEmpty(cityName))
+            {
+                weatherInfo.Current.CityName = cityName;
+            }
 
             // 현재 날씨
             CurrentWeather = weatherInfo.Current;

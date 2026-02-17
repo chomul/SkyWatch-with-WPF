@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using SkyWatch.Messages;
 using SkyWatch.Models;
 using SkyWatch.Services;
 
@@ -95,6 +97,20 @@ public partial class SearchViewModel : ViewModelBase
     private void SelectRecentSearch(string city)
     {
         SearchQuery = city;
+        // 선택 시 바로 검색 실행
+        _ = SearchAsync();
+    }
+
+    /// <summary>
+    /// 검색 결과 항목 선택 시 호출
+    /// </summary>
+    [RelayCommand]
+    private void SelectCity(SearchResult city)
+    {
+        if (city == null) return;
+
+        // 선택된 도시 정보를 메시지로 전송 (MainViewModel에서 수신)
+        WeakReferenceMessenger.Default.Send(new CitySelectedMessage(city));
     }
 }
 
