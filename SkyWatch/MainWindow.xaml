@@ -245,11 +245,30 @@
                             <ItemsControl ItemsSource="{Binding FavoriteCities}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border x:Name="cityBorder"
-                                                Background="#08FFFFFF"
-                                                BorderBrush="#0DFFFFFF" BorderThickness="1"
-                                                CornerRadius="12" Padding="10,10"
-                                                Margin="0,0,0,8" Cursor="Hand">
+                                        <Button Command="{Binding DataContext.SelectFavoriteCityCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                Cursor="Hand"
+                                                Margin="0,0,0,8"
+                                                Background="Transparent" BorderThickness="0" Padding="0">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="cityBorder"
+                                                            Background="#08FFFFFF"
+                                                            BorderBrush="#0DFFFFFF" BorderThickness="1"
+                                                            CornerRadius="12" Padding="10,10">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="cityBorder" Property="Background" Value="#12FFFFFF"/>
+                                                        </Trigger>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                            <Setter TargetName="cityBorder" Property="Background" Value="#1A4FA3FF"/>
+                                                            <Setter TargetName="cityBorder" Property="BorderBrush" Value="#404FA3FF"/>
+                                                        </DataTrigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="28"/>
@@ -258,7 +277,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <!-- 국기 -->
                                                 <TextBlock Grid.Column="0" Text="{Binding FlagEmoji}"
-                                                           FontSize="20" VerticalAlignment="Center"/>
+                                                           FontSize="20" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
                                                 <!-- 도시 정보 -->
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
                                                     <TextBlock Text="{Binding CityName}" FontSize="12" FontWeight="SemiBold"
@@ -286,29 +305,15 @@
                                                     </Ellipse.Effect>
                                                 </Ellipse>
                                             </Grid>
-                                        </Border>
+                                        </Button>
                                         <DataTemplate.Triggers>
                                             <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                <Setter TargetName="cityBorder" Property="Background" Value="#1A4FA3FF"/>
-                                                <Setter TargetName="cityBorder" Property="BorderBrush" Value="#404FA3FF"/>
                                                 <Setter TargetName="activeDot" Property="Visibility" Value="Visible"/>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-
-                            <!-- 도시 추가 버튼 -->
-                            <Border Background="Transparent"
-                                    BorderBrush="#1EFFFFFF" BorderThickness="1"
-                                    CornerRadius="12" Padding="10,10"
-                                    Margin="0,4,0,0" Cursor="Hand">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock Text="➕" FontSize="12" Margin="0,0,8,0"/>
-                                    <TextBlock Text="도시 추가" FontSize="12"
-                                               Foreground="{DynamicResource TextMutedBrush}"/>
-                                </StackPanel>
-                            </Border>
                         </StackPanel>
                     </DockPanel>
                 </Border>

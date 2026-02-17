@@ -92,8 +92,10 @@ public class OpenWeatherService : IWeatherService
         return new CurrentWeather
         {
             CityName = root.GetProperty("name").GetString() ?? "",
-            CountryCode = sys.GetProperty("country").GetString() ?? "",
-            Description = weather.GetProperty("description").GetString() ?? "",
+            CountryCode = root.GetProperty("sys").GetProperty("country").GetString() ?? "",
+            Lat = root.GetProperty("coord").GetProperty("lat").GetDouble(),
+            Lon = root.GetProperty("coord").GetProperty("lon").GetDouble(),
+            Description = root.GetProperty("weather")[0].GetProperty("description").GetString() ?? "",
             IconCode = weather.GetProperty("icon").GetString() ?? "",
             Temperature = main.GetProperty("temp").GetDouble(),
             FeelsLike = main.GetProperty("feels_like").GetDouble(),

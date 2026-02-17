@@ -20,6 +20,12 @@ public class FavoriteCity
     /// <summary>날씨 아이콘 코드 (예: "01d")</summary>
     public string IconCode { get; set; } = string.Empty;
 
+    /// <summary>위도</summary>
+    public double Lat { get; set; }
+
+    /// <summary>경도</summary>
+    public double Lon { get; set; }
+
     /// <summary>현재 선택(활성)된 도시 여부</summary>
     public bool IsActive { get; set; }
 }

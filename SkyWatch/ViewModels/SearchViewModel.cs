@@ -28,10 +28,7 @@ public partial class SearchViewModel : ViewModelBase
     {
         Title = "도시 검색";
 
-        // 더미 최근 검색
-        RecentSearches.Add("Seoul");
-        RecentSearches.Add("Tokyo");
-        RecentSearches.Add("New York");
+
     }
 
     // 엔터 키 입력 시 검색 실행

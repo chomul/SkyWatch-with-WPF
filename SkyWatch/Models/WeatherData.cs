@@ -11,6 +11,12 @@ public class CurrentWeather
     /// <summary>국가 코드 (KR, US 등)</summary>
     public string CountryCode { get; set; } = string.Empty;
 
+    /// <summary>위도</summary>
+    public double Lat { get; set; }
+
+    /// <summary>경도</summary>
+    public double Lon { get; set; }
+
     /// <summary>날씨 설명 (대체로 맑음, 비 등)</summary>
     public string Description { get; set; } = string.Empty;
 

@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SkyWatch.Models;
 using SkyWatch.Services;
+using SkyWatch.Messages;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace SkyWatch.ViewModels;
 
@@ -20,6 +22,8 @@ public partial class HomeViewModel : ViewModelBase
     private CurrentWeather? _currentWeather;
 
     // ── 예보 목록 ──
+
+
 
     [ObservableProperty]
     private ObservableCollection<HourlyForecast> _hourlyForecasts = [];
@@ -45,6 +49,9 @@ public partial class HomeViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _windUnitLabel = ApiConfig.WindUnitLabel;
+
+    [ObservableProperty]
+    private bool _isFavorite;
 
     public HomeViewModel() : this(new OpenWeatherService())
     {
@@ -156,5 +163,15 @@ public partial class HomeViewModel : ViewModelBase
 
         var city = CurrentWeather?.CityName ?? "Seoul";
         await LoadWeatherAsync(city);
+    }
+    [RelayCommand]
+    private void SendToggleFavorite()
+    {
+        if (CurrentWeather != null)
+        {
+            WeakReferenceMessenger.Default.Send(new ToggleFavoriteMessage(CurrentWeather));
+            // 낙관적 UI 업데이트: MainViewModel 응답 기다리지 않고 토글
+            IsFavorite = !IsFavorite;
+        }
     }
 }

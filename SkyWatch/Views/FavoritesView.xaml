@@ -3,20 +3,105 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:SkyWatch.Converters"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
 
+    <UserControl.Resources>
+        <converters:WeatherIconConverter x:Key="WeatherIconConverter"/>
+    </UserControl.Resources>
+
     <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="⭐" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,12"/>
-            <TextBlock Text="즐겨찾기"
-                       FontSize="20" FontWeight="SemiBold"
-                       Foreground="{DynamicResource TextPrimaryBrush}"
-                       HorizontalAlignment="Center"/>
-            <TextBlock Text="Stage 5에서 즐겨찾기 관리가 여기에 구현됩니다"
-                       FontSize="13"
-                       Foreground="{DynamicResource TextMutedBrush}"
-                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
-        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="28">
+                <!-- 헤더 -->
+                <TextBlock Text="즐겨찾기" FontSize="20" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,16"/>
+
+                <!-- 즐겨찾기 목록 -->
+                <ListBox ItemsSource="{Binding FavoriteCities}"
+                         Background="Transparent" BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         HorizontalContentAlignment="Stretch">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Padding" Value="0,0,0,12"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter Margin="{TemplateBinding Padding}"/>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#0BFFFFFF" BorderBrush="#1AFFFFFF" BorderThickness="1"
+                                    CornerRadius="12" Padding="16" Cursor="Hand">
+                                <Border.InputBindings>
+                                    <MouseBinding Gesture="LeftClick" 
+                                                  Command="{Binding DataContext.SelectFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                  CommandParameter="{Binding}"/>
+                                </Border.InputBindings>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- 왼쪽: 도시명 + 국가 -->
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding CityName}" FontSize="18" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding CountryCode}" FontSize="12"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- 중간: 날씨 아이콘 + 온도 -->
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                                        <TextBlock Text="{Binding IconCode, Converter={StaticResource WeatherIconConverter}}"
+                                                   FontSize="28" Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock Text="{Binding Temperature, StringFormat='{}{0:0}°'}"
+                                                   FontSize="20" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- 오른쪽: 삭제 버튼 -->
+                                    <Button Grid.Column="2" 
+                                            Command="{Binding DataContext.DeleteFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            CommandParameter="{Binding}"
+                                            VerticalAlignment="Center"
+                                            Background="Transparent" BorderThickness="0"
+                                            Padding="8" Cursor="Hand">
+                                        <TextBlock Text="✕" FontSize="14" Foreground="{DynamicResource TextMutedBrush}"/>
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#20FFFFFF"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource AccentWarmBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

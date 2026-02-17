@@ -11,6 +11,9 @@ public class SearchResult
     /// <summary>국가/지역명 (예: 대한민국 · 부산광역시)</summary>
     public string CountryName { get; set; } = string.Empty;
 
+    /// <summary>국가 코드 (예: KR)</summary>
+    public string CountryCode { get; set; } = string.Empty;
+
     /// <summary>국기 이모지 (예: 🇰🇷)</summary>
     public string FlagEmoji { get; set; } = string.Empty;
 
